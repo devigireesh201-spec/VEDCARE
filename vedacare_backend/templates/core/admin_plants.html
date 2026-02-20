@@ -1,0 +1,431 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Plant Management - VedaCare Admin{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --admin-primary: #1e293b;
+        --admin-accent: #3b82f6;
+        --admin-bg: #f8fafc;
+    }
+
+    .admin-container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: var(--admin-bg);
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+    }
+
+    /* Admin Sidebar */
+    .admin-sidebar {
+        background: white;
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .sidebar-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--gray-400);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    .admin-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .admin-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1.25rem;
+        border-radius: var(--radius-lg);
+        color: var(--gray-600);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .admin-nav-item i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .admin-nav-item:hover {
+        background: var(--gray-50);
+        color: var(--admin-primary);
+    }
+
+    .admin-nav-item.active {
+        background: var(--admin-primary);
+        color: white;
+    }
+
+    /* Main Content */
+    .admin-main {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title h1 {
+        font-size: 2rem;
+        color: var(--admin-primary);
+        font-family: var(--font-display);
+    }
+
+    .plant-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .plant-card-admin {
+        background: white;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        border: 1px solid var(--gray-100);
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+    }
+
+    .plant-card-admin:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .plant-img-wrapper {
+        height: 180px;
+        position: relative;
+    }
+
+    .plant-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .plant-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--admin-accent);
+        backdrop-filter: blur(4px);
+    }
+
+    .plant-body-admin {
+        padding: 1.5rem;
+    }
+
+    .plant-body-admin h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.25rem;
+        color: var(--admin-primary);
+    }
+
+    .scientific-name {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        font-style: italic;
+        margin-bottom: 1rem;
+    }
+
+    .plant-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--gray-50);
+    }
+
+    .price-tag {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #059669;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--gray-200);
+        background: white;
+        color: var(--gray-600);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+        background: var(--admin-accent);
+        color: white;
+        border-color: var(--admin-accent);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        background: white;
+        width: 90%;
+        max-width: 600px;
+        margin: 5vh auto;
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--gray-700);
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+    }
+</style>
+
+<div class="admin-container">
+    <aside class="admin-sidebar">
+        <div class="sidebar-title">Admin Modules</div>
+        <nav class="admin-nav">
+            <a href="{% url 'admin_analytics' %}" class="admin-nav-item">
+                <i class="fas fa-chart-pie"></i> Analytics Hub
+            </a>
+            <a href="{% url 'admin_conditions' %}" class="admin-nav-item">
+                <i class="fas fa-notes-medical"></i> Disease Logic
+            </a>
+            <a href="{% url 'admin_users' %}" class="admin-nav-item">
+                <i class="fas fa-users"></i> User Management
+            </a>
+            <a href="{% url 'admin_plants' %}" class="admin-nav-item active">
+                <i class="fas fa-leaf"></i> Plant Database
+            </a>
+            <a href="{% url 'admin_orders' %}" class="admin-nav-item">
+                <i class="fas fa-shopping-cart"></i> Order Tracking
+            </a>
+            <a href="{% url 'profile' %}" class="admin-nav-item">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+            <a href="{% url 'dashboard' %}" class="admin-nav-item"
+                style="margin-top: 2rem; border-top: 1px solid var(--gray-100); padding-top: 1.5rem;">
+                <i class="fas fa-arrow-left"></i> Exit Admin
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Botanical Database</h1>
+                <p>Curate the library of Ayurvedic plants and treatments.</p>
+            </div>
+            <button onclick="openModal()" class="btn-primary-admin"
+                style="padding: 0.875rem 1.5rem; border-radius: var(--radius-lg); border: none; font-weight: 700; cursor: pointer; color: white; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-plus"></i> Add New Botanical
+            </button>
+        </div>
+
+        <div class="plant-grid">
+            {% for plant in plants %}
+            <div class="plant-card-admin">
+                <div class="plant-img-wrapper">
+                    {% if plant.image %}
+                    <img src="{{ plant.image.url }}" alt="{{ plant.name }}">
+                    {% else %}
+                    <div
+                        style="width: 100%; height: 100%; background: var(--gray-100); display: flex; align-items: center; justify-content: center; color: var(--gray-400);">
+                        <i class="fas fa-leaf fa-3x"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="plant-body-admin">
+                    <h3>{{ plant.name }}</h3>
+                    <div class="scientific-name">{{ plant.scientific_name }}</div>
+
+                    <div class="plant-meta">
+                        <div class="price-tag">₹{{ plant.price }}</div>
+                        <div class="action-group">
+                            <button class="btn-icon"
+                                onclick='editPlant({{ plant.id }}, "{{ plant.name|escapejs }}", "{{ plant.scientific_name|escapejs }}", "{{ plant.medicinal_use|escapejs }}", "{{ plant.properties|escapejs }}", "{{ plant.habitat|escapejs }}", "{{ plant.preparation_method|escapejs }}", "{{ plant.precautions|escapejs }}", {{ plant.price }})'
+                                title="Edit"><i class="fas fa-pen"></i></button>
+                            <a href="{% url 'delete_plant' plant.id %}"
+                                onclick="return confirm('Are you sure you want to delete this plant?')" class="btn-icon"
+                                style="color: var(--error);"><i class="fas fa-trash"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+
+<!-- Add/Edit Plant Modal -->
+<div id="plantModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add New Botanical</h2>
+            <button onclick="closeModal()"
+                style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="plant_id" id="plant_id">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Common Name</label>
+                    <input type="text" name="name" id="p_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Scientific Name</label>
+                    <input type="text" name="scientific_name" id="p_scientific" required>
+                </div>
+                <div class="form-group full">
+                    <label>Medicinal Use</label>
+                    <textarea name="medicinal_use" id="p_use" rows="2" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Ayurvedic Properties</label>
+                    <input type="text" name="properties" id="p_properties" placeholder="Rasa, Guna, Virya" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₹)</label>
+                    <input type="number" step="0.01" name="price" id="p_price" required>
+                </div>
+                <div class="form-group">
+                    <label>Habitat</label>
+                    <input type="text" name="habitat" id="p_habitat" required>
+                </div>
+                <div class="form-group">
+                    <label>Plant Image</label>
+                    <input type="file" name="image" accept="image/*">
+                </div>
+                <div class="form-group full">
+                    <label>Preparation Method</label>
+                    <textarea name="preparation_method" id="p_method" rows="2" required></textarea>
+                </div>
+                <div class="form-group full">
+                    <label>Precautions</label>
+                    <textarea name="precautions" id="p_precautions" rows="2" required></textarea>
+                </div>
+            </div>
+            <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1; padding: 1rem;">Save Botanical</button>
+                <button type="button" onclick="closeModal()" class="btn"
+                    style="flex: 1; padding: 1rem; border: 1px solid var(--gray-200);">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('modalTitle').innerText = 'Add New Botanical';
+        document.getElementById('plant_id').value = '';
+        document.getElementById('p_name').value = '';
+        document.getElementById('p_scientific').value = '';
+        document.getElementById('p_use').value = '';
+        document.getElementById('p_properties').value = '';
+        document.getElementById('p_habitat').value = '';
+        document.getElementById('p_method').value = '';
+        document.getElementById('p_precautions').value = '';
+        document.getElementById('p_price').value = '';
+        document.getElementById('plantModal').style.display = 'block';
+    }
+
+    function editPlant(id, name, scientific, use, properties, habitat, method, precautions, price) {
+        document.getElementById('modalTitle').innerText = 'Edit Botanical';
+        document.getElementById('plant_id').value = id;
+        document.getElementById('p_name').value = name;
+        document.getElementById('p_scientific').value = scientific;
+        document.getElementById('p_use').value = use;
+        document.getElementById('p_properties').value = properties;
+        document.getElementById('p_habitat').value = habitat;
+        document.getElementById('p_method').value = method;
+        document.getElementById('p_precautions').value = precautions;
+        document.getElementById('p_price').value = price;
+        document.getElementById('plantModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('plantModal').style.display = 'none';
+    }
+
+    window.onclick = function (event) {
+        if (event.target == document.getElementById('plantModal')) {
+            closeModal();
+        }
+    }
+</script>
+{% endblock %}

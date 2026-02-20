@@ -1,0 +1,311 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Admin Dashboard - VedaCare{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --admin-primary: #1e293b;
+        --admin-accent: #3b82f6;
+        --admin-bg: #f8fafc;
+    }
+
+    .admin-container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: var(--admin-bg);
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+    }
+
+    /* Admin Sidebar */
+    .admin-sidebar {
+        background: white;
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .sidebar-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--gray-400);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    .admin-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .admin-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1.25rem;
+        border-radius: var(--radius-lg);
+        color: var(--gray-600);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .admin-nav-item i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .admin-nav-item:hover {
+        background: var(--gray-50);
+        color: var(--admin-primary);
+    }
+
+    .admin-nav-item.active {
+        background: var(--admin-primary);
+        color: white;
+    }
+
+    /* Main Content */
+    .admin-main {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .header-title h1 {
+        font-size: 2.5rem;
+        color: var(--admin-primary);
+        font-family: var(--font-display);
+        margin-bottom: 0.5rem;
+    }
+
+    .header-title p {
+        color: var(--gray-500);
+        font-size: 1.1rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 2rem;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-100);
+    }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-xl);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .stat-value {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: var(--admin-primary);
+        margin: 0.5rem 0;
+    }
+
+    .stat-label {
+        color: var(--gray-500);
+        font-weight: 600;
+    }
+
+    /* Table Section */
+    .content-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .admin-table th {
+        background: var(--gray-50);
+        padding: 1rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--gray-500);
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .admin-table td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .condition-pill {
+        display: inline-block;
+        padding: 0.375rem 1rem;
+        background: #eff6ff;
+        color: #1e40af;
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+</style>
+
+<div class="admin-container">
+    <aside class="admin-sidebar">
+        <div class="sidebar-title">Admin Modules</div>
+        <nav class="admin-nav">
+            <a href="{% url 'admin_analytics' %}" class="admin-nav-item active">
+                <i class="fas fa-chart-pie"></i> Analytics Hub
+            </a>
+            <a href="{% url 'admin_conditions' %}" class="admin-nav-item">
+                <i class="fas fa-notes-medical"></i> Disease Logic
+            </a>
+            <a href="{% url 'admin_users' %}" class="admin-nav-item">
+                <i class="fas fa-users"></i> User Management
+            </a>
+            <a href="{% url 'admin_plants' %}" class="admin-nav-item">
+                <i class="fas fa-leaf"></i> Plant Database
+            </a>
+            <a href="{% url 'admin_orders' %}" class="admin-nav-item">
+                <i class="fas fa-shopping-cart"></i> Order Tracking
+            </a>
+            <a href="{% url 'profile' %}" class="admin-nav-item">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+            <a href="#" class="admin-nav-item">
+                <i class="fas fa-shield-alt"></i> Security & Logs
+            </a>
+            <a href="{% url 'dashboard' %}" class="admin-nav-item"
+                style="margin-top: 2rem; border-top: 1px solid var(--gray-100); padding-top: 1.5rem;">
+                <i class="fas fa-arrow-left"></i> Exit Admin
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        <div class="admin-header">
+            <div class="header-title">
+                <h1>Admin Control Center</h1>
+                <p>Real-time system health and clinical insights.</p>
+            </div>
+            <div class="header-actions">
+                <form action="{% url 'export_sales_pdf' %}" method="GET"
+                    style="display: flex; gap: 0.75rem; align-items: flex-end; background: white; padding: 1.25rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100);">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label
+                            style="font-size: 0.75rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase;">From</label>
+                        <input type="date" name="start_date" class="form-control"
+                            style="padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--gray-200); font-size: 0.875rem;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label
+                            style="font-size: 0.75rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase;">To</label>
+                        <input type="date" name="end_date" class="form-control"
+                            style="padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--gray-200); font-size: 0.875rem;">
+                    </div>
+                    <button type="submit" class="btn btn-primary"
+                        style="padding: 0.625rem 1.25rem; font-size: 0.875rem; height: 38px; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-file-pdf"></i> Export Sales report
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ total_users }}</div>
+                <div class="stat-label">Total Patients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: #ecfdf5; color: #10b981;"><i
+                            class="fas fa-microscope"></i></div>
+                </div>
+                <div class="stat-value">{{ total_analyses }}</div>
+                <div class="stat-label">AI Analyses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: #fff7ed; color: #f59e0b;"><i
+                            class="fas fa-shopping-bag"></i></div>
+                </div>
+                <div class="stat-value">{{ total_orders }}</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: #fdf2f8; color: #db2777;"><i class="fas fa-brain"></i>
+                    </div>
+                </div>
+                <div class="stat-value">98.2%</div>
+                <div class="stat-label">AI Accuracy</div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 2rem;">Common Health Concerns</h2>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Condition</th>
+                        <th>Occurrence</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in disease_stats %}
+                    <tr>
+                        <td><span class="condition-pill">{{ stat.predicted_disease }}</span></td>
+                        <td><strong>{{ stat.count }}</strong> reports</td>
+                        <td style="color: var(--success); font-weight: 700;"><i class="fas fa-caret-up"></i> 12%</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 4rem;">No diagnosis data yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,349 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Disease Logic Management - VedaCare Admin{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --admin-primary: #1e293b;
+        --admin-accent: #3b82f6;
+        --admin-bg: #f8fafc;
+    }
+
+    .admin-container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: var(--admin-bg);
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+    }
+
+    /* Admin Sidebar (Consistent) */
+    .admin-sidebar {
+        background: white;
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .sidebar-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--gray-400);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    .admin-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .admin-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1.25rem;
+        border-radius: var(--radius-lg);
+        color: var(--gray-600);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .admin-nav-item.active {
+        background: var(--admin-primary);
+        color: white;
+    }
+
+    /* Main Content */
+    .admin-main {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title h1 {
+        font-size: 2rem;
+        color: var(--admin-primary);
+        font-family: var(--font-display);
+    }
+
+    .content-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-100);
+        padding: 2rem;
+    }
+
+    .logic-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .logic-table th {
+        background: var(--gray-50);
+        padding: 1rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--gray-500);
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .logic-table td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid var(--gray-100);
+        color: var(--gray-700);
+    }
+
+    .keyword-pill {
+        display: inline-block;
+        padding: 0.25rem 0.625rem;
+        background: #f1f5f9;
+        color: #475569;
+        border-radius: var(--radius-md);
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin: 0.25rem;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--gray-200);
+        background: white;
+        color: var(--gray-600);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-icon-sm:hover {
+        background: var(--admin-accent);
+        color: white;
+        border-color: var(--admin-accent);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        background: white;
+        width: 90%;
+        max-width: 600px;
+        margin: 5vh auto;
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--gray-700);
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+    }
+</style>
+
+<div class="admin-container">
+    <aside class="admin-sidebar">
+        <div class="sidebar-title">Admin Modules</div>
+        <nav class="admin-nav">
+            <a href="{% url 'admin_analytics' %}" class="admin-nav-item">
+                <i class="fas fa-chart-pie"></i> Analytics Hub
+            </a>
+            <a href="{% url 'admin_conditions' %}" class="admin-nav-item active">
+                <i class="fas fa-notes-medical"></i> Disease Logic
+            </a>
+            <a href="{% url 'admin_users' %}" class="admin-nav-item">
+                <i class="fas fa-users"></i> User Management
+            </a>
+            <a href="{% url 'admin_plants' %}" class="admin-nav-item">
+                <i class="fas fa-leaf"></i> Plant Database
+            </a>
+            <a href="{% url 'admin_orders' %}" class="admin-nav-item">
+                <i class="fas fa-shopping-cart"></i> Order Tracking
+            </a>
+            <a href="{% url 'profile' %}" class="admin-nav-item">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+            <a href="{% url 'dashboard' %}" class="admin-nav-item"
+                style="margin-top: 2rem; border-top: 1px solid var(--gray-100); padding-top: 1.5rem;">
+                <i class="fas fa-arrow-left"></i> Exit Admin
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Disease & Symptom Logic</h1>
+                <p>Configure the AI diagnostic engine's keyword matching and remedies.</p>
+            </div>
+            <button onclick="openModal()" class="btn-primary-admin"
+                style="padding: 0.875rem 1.5rem; border-radius: var(--radius-lg); border: none; font-weight: 700; cursor: pointer; color: white; background: var(--admin-primary); display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-plus"></i> New Logic Rule
+            </button>
+        </div>
+
+        <div class="content-card">
+            <table class="logic-table">
+                <thead>
+                    <tr>
+                        <th>Condition Name</th>
+                        <th>Keywords</th>
+                        <th>Recommended Remedy</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for condition in conditions %}
+                    <tr>
+                        <td><strong>{{ condition.name }}</strong></td>
+                        <td>
+                            <div style="max-width: 250px;">
+                                {% for keyword in condition.keywords.split %}
+                                <span class="keyword-pill">{{ keyword|cut:"," }}</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            <div style="max-width:300px; font-size: 0.875rem; color: var(--gray-600);">
+                                {{ condition.remedy|truncatechars:100 }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-group">
+                                <button class="btn-icon-sm"
+                                    onclick='editCondition({{ condition.id }}, "{{ condition.name|escapejs }}", "{{ condition.keywords|escapejs }}", "{{ condition.remedy|escapejs }}", "{{ condition.preparation|escapejs }}", "{{ condition.search_terms|escapejs }}")'><i
+                                        class="fas fa-edit"></i></button>
+                                <a href="{% url 'delete_condition' condition.id %}"
+                                    onclick="return confirm('Delete this logic rule?')" class="btn-icon-sm"
+                                    style="color: var(--error);"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<!-- Condition Modal -->
+<div id="conditionModal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 id="modalTitle">Add Logic Rule</h2>
+            <button onclick="closeModal()"
+                style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="condition_id" id="condition_id">
+            <div class="form-group">
+                <label>Condition Name</label>
+                <input type="text" name="name" id="c_name" required>
+            </div>
+            <div class="form-group">
+                <label>Keywords (comma separated)</label>
+                <input type="text" name="keywords" id="c_keywords" placeholder="e.g. fever, headache, pain" required>
+            </div>
+            <div class="form-group">
+                <label>Recommended Remedy</label>
+                <textarea name="remedy" id="c_remedy" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Preparation Instructions</label>
+                <textarea name="preparation" id="c_preparation" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Botanical Search Terms (comma separated)</label>
+                <input type="text" name="search_terms" id="c_search" placeholder="e.g. Tulsi, Ginger" required>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1; padding: 1rem;">Save Rule</button>
+                <button type="button" onclick="closeModal()" class="btn"
+                    style="flex: 1; padding: 1rem; border: 1px solid var(--gray-200);">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('modalTitle').innerText = 'Add Logic Rule';
+        document.getElementById('condition_id').value = '';
+        document.getElementById('c_name').value = '';
+        document.getElementById('c_keywords').value = '';
+        document.getElementById('c_remedy').value = '';
+        document.getElementById('c_preparation').value = '';
+        document.getElementById('c_search').value = '';
+        document.getElementById('conditionModal').style.display = 'block';
+    }
+
+    function editCondition(id, name, keywords, remedy, prep, search) {
+        document.getElementById('modalTitle').innerText = 'Edit Logic Rule';
+        document.getElementById('condition_id').value = id;
+        document.getElementById('c_name').value = name;
+        document.getElementById('c_keywords').value = keywords;
+        document.getElementById('c_remedy').value = remedy;
+        document.getElementById('c_preparation').value = prep;
+        document.getElementById('c_search').value = search;
+        document.getElementById('conditionModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('conditionModal').style.display = 'none';
+    }
+</script>
+{% endblock %}

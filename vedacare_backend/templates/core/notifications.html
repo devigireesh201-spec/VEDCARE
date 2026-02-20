@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Notifications - VedaCare{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 4rem 1rem;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1 style="color: var(--primary-900); font-family: var(--font-display);">
+                <i class="fas fa-bell"></i> Notifications
+            </h1>
+            <span class="badge"
+                style="background: var(--primary-100); color: var(--primary-700); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600;">
+                {{ notifications.count }} Total
+            </span>
+        </div>
+
+        {% if notifications %}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for notification in notifications %}
+            <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-md); border-left: 5px solid {% if not notification.is_read %}var(--primary-500){% else %}var(--gray-300){% endif %}; transition: transform 0.3s;"
+                onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <h3 style="margin: 0; color: var(--gray-900); font-size: 1.25rem;">{{ notification.title }}</h3>
+                    <span style="font-size: 0.85rem; color: var(--gray-500);">{{ notification.created_at|timesince }}
+                        ago</span>
+                </div>
+                <p style="margin: 0; color: var(--gray-600); line-height: 1.6;">{{ notification.message }}</p>
+                {% if not notification.is_read %}
+                <span
+                    style="display: inline-block; width: 8px; height: 8px; background: var(--primary-500); border-radius: 50%; margin-top: 0.5rem;"></span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div
+            style="text-align: center; padding: 5rem 2rem; background: white; border-radius: 1rem; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.3;">🔔</div>
+            <h3 style="color: var(--gray-600);">No notifications yet</h3>
+            <p style="color: var(--gray-400);">We'll notify you about your health reports and orders here.</p>
+            <a href="{% url 'dashboard' %}" class="btn btn-primary" style="margin-top: 1.5rem;">Back to Dashboard</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

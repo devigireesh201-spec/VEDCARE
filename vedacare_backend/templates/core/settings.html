@@ -1,0 +1,587 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Account Settings - VedaCare{% endblock %}
+
+{% block content %}
+<style>
+    .settings-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .settings-header {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        color: white;
+        padding: 4rem 3rem;
+        border-radius: var(--radius-2xl);
+        margin-bottom: -4rem;
+        position: relative;
+        z-index: 1;
+        box-shadow: var(--shadow-xl);
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .settings-icon-large {
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-2xl);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .settings-header-info h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        font-family: var(--font-display);
+    }
+
+    .settings-content-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+        padding-top: 2rem;
+    }
+
+    .settings-sidebar {
+        position: relative;
+        z-index: 2;
+    }
+
+    .settings-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        margin-top: 4rem;
+    }
+
+    .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: var(--radius-lg);
+        color: var(--gray-600);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .nav-item:hover {
+        background: var(--primary-50);
+        color: var(--primary-700);
+    }
+
+    .nav-item.active {
+        background: var(--primary-50);
+        color: var(--primary-700);
+        border-color: var(--primary-200);
+    }
+
+    .settings-main {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: 3rem;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        z-index: 2;
+        margin-top: 4rem;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .settings-section {
+        margin-bottom: 3rem;
+    }
+
+    .settings-section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--gray-100);
+    }
+
+    .setting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--gray-50);
+    }
+
+    .setting-row:last-child {
+        border-bottom: none;
+    }
+
+    .setting-info h4 {
+        font-size: 1.1rem;
+        color: var(--gray-900);
+        margin-bottom: 0.25rem;
+    }
+
+    .setting-info p {
+        font-size: 0.9rem;
+        color: var(--gray-500);
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 26px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--gray-300);
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked+.slider {
+        background-color: var(--primary-500);
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(24px);
+    }
+
+    .btn-outline-danger {
+        border: 2px solid var(--error);
+        color: var(--error);
+        background: transparent;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-danger:hover {
+        background: var(--error);
+        color: white;
+    }
+
+    /* Professional Modal System */
+    .veda-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .veda-modal-overlay.active {
+        display: flex;
+        opacity: 1;
+    }
+
+    .veda-modal-card {
+        background: white;
+        width: 100%;
+        max-width: 450px;
+        border-radius: var(--radius-2xl);
+        padding: 2.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .veda-modal-overlay.active .veda-modal-card {
+        transform: translateY(0);
+    }
+
+    .veda-modal-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: var(--gradient-primary);
+    }
+
+    .modal-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        background: var(--primary-50);
+        color: var(--primary-600);
+        border-radius: var(--radius-xl);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        margin-bottom: 0.75rem;
+    }
+
+    .modal-desc {
+        color: var(--gray-500);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .modal-btn {
+        flex: 1;
+        padding: 1rem;
+        border-radius: var(--radius-xl);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        text-align: center;
+    }
+
+    .modal-btn-primary {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+    }
+
+    .modal-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);
+    }
+
+    .modal-btn-secondary {
+        background: var(--gray-100);
+        color: var(--gray-700);
+    }
+
+    .modal-btn-secondary:hover {
+        background: var(--gray-200);
+    }
+
+    /* 4-Digit Input Styling */
+    .digit-input-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .digit-field-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .digit-field-wrapper label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--gray-500);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .verification-input {
+        background: var(--gray-50);
+        border: 2px solid var(--gray-100);
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius-xl);
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: 0.5rem;
+        text-align: center;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .verification-input:focus {
+        background: white;
+        border-color: var(--primary-500);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    @media (max-width: 992px) {
+        .settings-content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .settings-header {
+            flex-direction: column;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+    }
+</style>
+
+<div class="settings-container">
+    <div class="settings-header">
+        <div class="settings-icon-large">
+            <i class="fas fa-cog"></i>
+        </div>
+        <div class="settings-header-info">
+            <h1>Account Settings</h1>
+            <p>Manage your account preferences and security</p>
+        </div>
+    </div>
+
+    <div class="settings-content-grid">
+        <aside class="settings-sidebar">
+            <div class="settings-card">
+                <nav class="sidebar-nav">
+                    <a href="{% url 'profile' %}" class="nav-item">
+                        <i class="fas fa-user-edit"></i> Personal Info
+                    </a>
+                    <a href="{% url 'settings' %}" class="nav-item active">
+                        <i class="fas fa-cog"></i> Account Settings
+                    </a>
+                    <a href="{% url 'history' %}#orders" class="nav-item">
+                        <i class="fas fa-history"></i> Order History
+                    </a>
+                    <a href="{% url 'history' %}#reports" class="nav-item">
+                        <i class="fas fa-file-medical"></i> Health Reports
+                    </a>
+                    <a href="{% url 'logout' %}" class="nav-item" style="color: var(--error); margin-top: 1rem;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="settings-main">
+            <!-- Security Section -->
+            <div class="settings-section">
+                <h3 class="settings-section-title">
+                    <i class="fas fa-shield-alt"></i> Security
+                </h3>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Password</h4>
+                        <p>Last changed 3 months ago</p>
+                    </div>
+                    <a href="{% url 'password_reset' %}" class="btn btn-secondary btn-sm"
+                        style="text-decoration: none;">Change Password</a>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Two-Factor Authentication</h4>
+                        <p>Add an extra layer of security to your account</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="2fa-toggle" onchange="handle2FAToggle(this)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Preferences Section -->
+            <div class="settings-section">
+                <h3 class="settings-section-title">
+                    <i class="fas fa-sliders-h"></i> Preferences
+                </h3>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Email Notifications</h4>
+                        <p>Receive weekly health tips and order updates</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Public Profile</h4>
+                        <p>Make your health achievements visible to the community</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Stay Logged In</h4>
+                        <p>Remember this device for 30 days</p>
+                    </div>
+                    <label class="toggle-switch">
+                        {% if not request.session.get_expire_at_browser_close %}
+                        <input type="checkbox" checked disabled>
+                        {% else %}
+                        <input type="checkbox" disabled>
+                        {% endif %}
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="settings-section"
+                style="margin-top: 4rem; padding-top: 2rem; border-top: 2px solid var(--gray-100);">
+                <h3 class="settings-section-title" style="color: var(--error); border-color: rgba(239, 68, 68, 0.2);">
+                    <i class="fas fa-exclamation-triangle"></i> Danger Zone
+                </h3>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Delete Account</h4>
+                        <p>Permanently remove your account and all health data. This cannot be undone.</p>
+                    </div>
+                    <form id="delete-account-form" action="{% url 'delete_account' %}" method="POST"
+                        style="display: none;">
+                        {% csrf_token %}
+                    </form>
+                    <button class="btn-outline-danger" onclick="confirmDelete()">Delete Account</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Modal 1: Confirmation -->
+<div class="veda-modal-overlay" id="confirm-2fa-modal">
+    <div class="veda-modal-card">
+        <div class="modal-icon-wrapper">
+            <i class="fas fa-shield-check"></i>
+        </div>
+        <h2 class="modal-title">Enable 2FA?</h2>
+        <p class="modal-desc">Secure your accounts with an extra layer of protection. This will require a verification
+            code every time you log in.</p>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-secondary" onclick="close2FAModal('confirm-2fa-modal', false)">Maybe
+                Later</button>
+            <button class="modal-btn modal-btn-primary" onclick="proceedToVerification()">Yes, Let's do it</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 2: Verification Code -->
+<div class="veda-modal-overlay" id="verify-2fa-modal">
+    <div class="veda-modal-card">
+        <div class="modal-icon-wrapper">
+            <i class="fas fa-key-skeleton"></i>
+        </div>
+        <h2 class="modal-title">Secure Verification</h2>
+        <p class="modal-desc">Create a 4-digit security code that you will use to verify your identity.</p>
+
+        <div class="digit-input-container">
+            <div class="digit-field-wrapper">
+                <label>Verification Code</label>
+                <input type="text" maxlength="4" class="verification-input" id="v-code-1" placeholder="----">
+            </div>
+            <div class="digit-field-wrapper">
+                <label>Confirm Code</label>
+                <input type="text" maxlength="4" class="verification-input" id="v-code-2" placeholder="----">
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-secondary"
+                onclick="close2FAModal('verify-2fa-modal', false)">Cancel</button>
+            <button class="modal-btn modal-btn-primary" onclick="finalize2FA()">Activate 2FA</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handle2FAToggle(checkbox) {
+        if (checkbox.checked) {
+            document.getElementById('confirm-2fa-modal').classList.add('active');
+        }
+    }
+
+    function close2FAModal(modalId, stayOn) {
+        document.getElementById(modalId).classList.remove('active');
+        if (!stayOn) {
+            document.getElementById('2fa-toggle').checked = false;
+        }
+    }
+
+    function proceedToVerification() {
+        document.getElementById('confirm-2fa-modal').classList.remove('active');
+        document.getElementById('verify-2fa-modal').classList.add('active');
+    }
+
+    function finalize2FA() {
+        const code1 = document.getElementById('v-code-1').value;
+        const code2 = document.getElementById('v-code-2').value;
+
+        if (code1.length < 4) {
+            alert("Please enter a 4-digit code.");
+            return;
+        }
+
+        if (code1 !== code2) {
+            alert("Security codes do not match. Please try again.");
+            return;
+        }
+
+        // Professional success feedback
+        alert("Two-Factor Authentication has been successfully activated!");
+        document.getElementById('verify-2fa-modal').classList.remove('active');
+        document.getElementById('2fa-toggle').checked = true;
+    }
+
+    function confirmDelete() {
+        if (confirm("Are you absolutely sure you want to delete your VedaCare account? All your health history and reports will be permanently lost.")) {
+            document.getElementById('delete-account-form').submit();
+        }
+    }
+</script>
+{% endblock %}

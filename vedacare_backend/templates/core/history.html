@@ -1,0 +1,750 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Health History - VedaCare{% endblock %}
+
+{% block content %}
+<style>
+    .history-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .history-header {
+        margin-bottom: 3rem;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .history-title {
+        font-size: 2.5rem;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+        font-family: var(--font-display);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .history-subtitle {
+        font-size: 1.125rem;
+        color: var(--gray-600);
+    }
+
+    .tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .tab {
+        padding: 1rem 1.5rem;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--gray-600);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .tab:hover {
+        color: var(--primary-600);
+    }
+
+    .tab.active {
+        color: var(--primary-600);
+        border-bottom-color: var(--primary-600);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, var(--primary-500) 0%, var(--primary-200) 100%);
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+        padding-left: 2rem;
+        animation: slideInLeft 0.5s ease-out;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -2.5rem;
+        top: 0.5rem;
+        width: 1rem;
+        height: 1rem;
+        background: var(--primary-500);
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px var(--primary-100);
+    }
+
+    .report-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border-left: 5px solid var(--primary-500);
+        transition: all 0.3s ease;
+    }
+
+    .report-card:hover {
+        box-shadow: var(--shadow-xl);
+        transform: translateX(5px);
+    }
+
+    .report-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .report-date {
+        color: var(--gray-500);
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .report-severity {
+        padding: 0.5rem 1rem;
+        background: var(--primary-100);
+        color: var(--primary-700);
+        border-radius: var(--radius-full);
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+
+    .report-condition {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-700);
+        margin-bottom: 1rem;
+    }
+
+    .report-section {
+        margin-bottom: 1rem;
+    }
+
+    .report-label {
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .report-content {
+        color: var(--gray-600);
+        line-height: 1.7;
+        font-style: italic;
+    }
+
+    .plant-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .plant-tag {
+        padding: 0.5rem 1rem;
+        background: var(--gray-100);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        color: var(--gray-700);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 1.5rem;
+        border-left: 5px solid #3b82f6;
+        transition: all 0.3s ease;
+    }
+
+    .order-card:hover {
+        box-shadow: var(--shadow-xl);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .order-id {
+        font-weight: 700;
+        color: var(--gray-900);
+        font-size: 1.125rem;
+    }
+
+    .order-status {
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-full);
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+
+    .status-packed {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-shipped {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-delivered {
+        background: var(--primary-100);
+        color: var(--primary-700);
+    }
+
+    .order-total {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-600);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--gray-300);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--gray-500);
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .history-container {
+            padding: 2rem 1rem;
+        }
+
+        .history-title {
+            font-size: 2rem;
+            flex-direction: column;
+        }
+
+        .timeline {
+            padding-left: 1rem;
+        }
+
+        .timeline-item {
+            padding-left: 1.5rem;
+        }
+
+        .timeline-item::before {
+            left: -1.75rem;
+        }
+    }
+
+    /* Order Tracking Styles */
+    .step-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        margin: 0 auto 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-icon.active {
+        background: var(--primary-500);
+        color: white;
+        box-shadow: 0 0 0 5px var(--primary-100);
+    }
+
+    .step-icon.completed {
+        background: var(--primary-500);
+        color: white;
+    }
+
+    .step-icon.pending {
+        background: white;
+        color: var(--gray-400);
+        border: 2px solid var(--gray-200);
+    }
+
+    .step-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        max-width: 60px;
+        margin: 0 auto;
+    }
+
+    .step-label.active {
+        color: var(--primary-700);
+    }
+
+    .step-label.pending {
+        color: var(--gray-500);
+    }
+
+    /* Tracking Bar Width Logic */
+    .progress-bar-fill {
+        position: absolute;
+        top: 15px;
+        left: 0;
+        height: 4px;
+        background: var(--primary-500);
+        z-index: 1;
+        transition: width 1s ease-in-out;
+    }
+
+    .progress-bar-fill[data-status='Order Placed'] {
+        width: 0%;
+    }
+
+    .progress-bar-fill[data-status='Packed'] {
+        width: 25%;
+    }
+
+    .progress-bar-fill[data-status='Shipped'] {
+        width: 50%;
+    }
+
+    .progress-bar-fill[data-status='Out for Delivery'] {
+        width: 75%;
+    }
+
+    .progress-bar-fill[data-status='Delivered'] {
+        width: 100%;
+    }
+
+    /* Rating Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 2rem;
+        border-radius: var(--radius-xl);
+        width: 90%;
+        max-width: 500px;
+        box-shadow: var(--shadow-2xl);
+        position: relative;
+        animation: scaleIn 0.3s ease;
+    }
+
+    .close {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        color: var(--gray-400);
+        font-size: 2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .close:hover {
+        color: var(--error);
+    }
+
+    .star-rating {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .star-rating i {
+        font-size: 2rem;
+        color: var(--gray-300);
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .star-rating i.hovered,
+    .star-rating i.selected {
+        color: #fbbf24;
+    }
+</style>
+
+<div class="history-container">
+    <div class="history-header">
+        <h1 class="history-title">
+            <i class="fas fa-history"></i>
+            Your Health Journey
+        </h1>
+        <p class="history-subtitle">
+            Track your symptom analyses and order history
+        </p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('reports')">
+            <i class="fas fa-file-medical"></i> Health Reports
+        </button>
+        <button class="tab" onclick="switchTab('orders')">
+            <i class="fas fa-shopping-bag"></i> My Orders
+        </button>
+    </div>
+
+    <!-- Health Reports Tab -->
+    <div class="tab-content active" id="reports-tab">
+        {% if reports %}
+        <div class="timeline">
+            {% for report in reports %}
+            <div class="timeline-item">
+                <div class="report-card">
+                    <div class="report-header">
+                        <div>
+                            <div class="report-date">
+                                <i class="fas fa-calendar"></i>
+                                {{ report.created_at|date:"F d, Y - H:i" }}
+                            </div>
+                            <h3 class="report-condition">{{ report.predicted_disease }}</h3>
+                        </div>
+                        <div class="report-severity">
+                            <i class="fas fa-chart-line"></i>
+                            {{ report.probability }}% Severity
+                        </div>
+                    </div>
+
+                    <div class="report-section">
+                        <div class="report-label">
+                            <i class="fas fa-comment-medical"></i>
+                            Symptoms Described
+                        </div>
+                        <div class="report-content">
+                            "{{ report.symptoms_entered }}"
+                        </div>
+                    </div>
+
+                    {% if report.remedy %}
+                    <div class="report-section">
+                        <div class="report-label">
+                            <i class="fas fa-leaf"></i>
+                            Suggested Remedy
+                        </div>
+                        <div class="report-content" style="color: var(--primary-700); font-style: normal;">
+                            {{ report.remedy }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if report.preparation_method %}
+                    <div class="report-section"
+                        style="background: var(--gray-50); padding: 1rem; border-radius: var(--radius-md); border: 1px dashed var(--gray-200);">
+                        <div class="report-label" style="font-size: 0.9rem; color: #059669;">
+                            <i class="fas fa-mortar-pestle"></i>
+                            Preparation Method
+                        </div>
+                        <div class="report-content" style="font-size: 0.875rem; color: var(--gray-600);">
+                            {{ report.preparation_method }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if report.recommended_plants.all %}
+                    <div class="report-section">
+                        <div class="report-label">
+                            <i class="fas fa-leaf"></i>
+                            Recommended Herbal Remedies
+                        </div>
+                        <div class="plant-tags">
+                            {% for plant in report.recommended_plants.all %}
+                            <div class="plant-tag">
+                                <i class="fas fa-seedling"></i>
+                                {{ plant.name }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-file-medical"></i>
+            <h3>No Health Reports Yet</h3>
+            <p>You haven't performed any symptom analyses yet.</p>
+            <a href="{% url 'symptoms' %}" class="btn btn-primary">
+                <i class="fas fa-stethoscope"></i> Start First Analysis
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Orders Tab -->
+    <div class="tab-content" id="orders-tab">
+        {% if orders %}
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <div>
+                    <div class="order-id">
+                        <i class="fas fa-receipt"></i> Order #VEDA-{{ order.id }}
+                    </div>
+                    <div class="report-date" style="margin-top: 0.5rem;">
+                        <i class="fas fa-calendar"></i>
+                        {{ order.ordered_at|date:"F d, Y - H:i" }}
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="order-total">
+                        ₹{{ order.total_price }}
+                    </div>
+                    {% if order.status == 'Delivered' %}
+                    <div style="margin-top: 0.5rem;">
+                        {% if not order.rating %}
+                        <button onclick="openRatingModal('{{ order.id }}')" class="btn btn-sm"
+                            style="background:#f59e0b; color: #fff; border:none;">
+                            <i class="fas fa-star"></i> Rate Order
+                        </button>
+                        {% else <div style="color: #f59e0b; font-size: 0.9rem;">
+                            {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= order.rating %} <i class="fas fa-star"></i>
+                                {% else %}
+                                <i class="far fa-star" style="color:#d1d5db"></i>
+                                {% endif %}
+                                {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Visual Tracking Bar -->
+            <div style="margin: 2rem 0;">
+                <div style="display: flex; justify-content: space-between; position: relative; margin-bottom: 2rem;">
+                    <!-- Track Line -->
+                    <div
+                        style="position: absolute; top: 15px; left: 0; right: 0; height: 4px; background: var(--gray-200); z-index: 0;">
+                    </div>
+                    <div class="progress-bar-fill" data-status="{{ order.status }}"></div>
+
+                    {% for step in tracking_steps %}
+                    <div style="position: relative; text-align: center;">
+                        <div
+                            class="step-icon {% if order.status == step %}active{% elif order.status == 'Delivered' or order.status == 'Out for Delivery' and step != 'Delivered' or order.status == 'Shipped' and step == 'Order Placed' or order.status == 'Shipped' and step == 'Packed' or order.status == 'Packed' and step == 'Order Placed' %}completed{% else %}pending{% endif %}">
+                            <i class="fas 
+                                {% if step == 'Order Placed' %}fa-clock
+                                {% elif step == 'Packed' %}fa-box
+                                {% elif step == 'Shipped' %}fa-truck
+                                {% elif step == 'Out for Delivery' %}fa-motorcycle
+                                {% elif step == 'Delivered' %}fa-check-double
+                                {% endif %}"></i>
+                        </div>
+                        <div class="step-label {% if order.status == step %}active{% else %}pending{% endif %}">
+                            {{ step }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="report-section">
+                <div class="report-label">
+                    <i class="fas fa-box"></i>
+                    Items in this Order
+                </div>
+                <div class="plant-tags">
+                    {% for item in order.items.all %}
+                    <div class="plant-tag">
+                        <i class="fas fa-leaf"></i>
+                        {{ item.name }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>No Orders Found</h3>
+            <p>You haven't placed any orders yet.</p>
+            <a href="{% url 'ekart' %}" class="btn btn-primary">
+                <i class="fas fa-shopping-bag"></i> Start Shopping
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    <!-- Rating Modal HTML -->
+    <div id="ratingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRatingModal()">&times;</span>
+            <h2 style="text-align: center; color: var(--gray-800); margin-bottom: 0.5rem;">Rate Your Order</h2>
+            <p style="text-align: center; color: var(--gray-500); margin-bottom: 1.5rem;">How was your experience?</p>
+
+            <form id="ratingForm" method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="rating" id="ratingInput" required>
+                <div class="star-rating">
+                    <i class="far fa-star" data-value="1" onclick="setRating(1)"></i>
+                    <i class="far fa-star" data-value="2" onclick="setRating(2)"></i>
+                    <i class="far fa-star" data-value="3" onclick="setRating(3)"></i>
+                    <i class="far fa-star" data-value="4" onclick="setRating(4)"></i>
+                    <i class="far fa-star" data-value="5" onclick="setRating(5)"></i>
+                </div>
+                <div class="form-group">
+                    <textarea name="review" class="form-textarea" placeholder="Share your feedback (optional)..."
+                        rows="3"
+                        style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--gray-200);"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Submit Rating</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Rating Logic
+    const modal = document.getElementById('ratingModal');
+    const form = document.getElementById('ratingForm');
+    const ratingInput = document.getElementById('ratingInput');
+    const stars = document.querySelectorAll('.star-rating i');
+
+    function openRatingModal(orderId) {
+        form.action = `/rate-order/${orderId}/`;
+        modal.style.display = "block";
+    }
+
+    function closeRatingModal() {
+        modal.style.display = "none";
+        resetStars();
+    }
+
+    function setRating(rating) {
+        ratingInput.value = rating;
+        updateStarVisuals(rating);
+    }
+
+    function updateStarVisuals(rating) {
+        stars.forEach(star => {
+            const value = parseInt(star.getAttribute('data-value'));
+            if (value <= rating) {
+                star.classList.replace('far', 'fas');
+                star.style.color = '#fbbf24';
+            } else {
+                star.classList.replace('fas', 'far');
+                star.style.color = 'var(--gray-300)';
+            }
+        });
+    }
+
+    function resetStars() {
+        stars.forEach(star => {
+            star.classList.replace('fas', 'far');
+            star.style.color = 'var(--gray-300)';
+        });
+        ratingInput.value = '';
+    }
+
+    // Close modal if clicked outside
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            closeRatingModal();
+        }
+    }
+
+    function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        // Remove active class from all tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Show selected tab content
+        document.getElementById(tabName + '-tab').classList.add('active');
+
+        // Add active class to clicked tab
+        const activeTab = Array.from(document.querySelectorAll('.tab')).find(tab =>
+            tab.getAttribute('onclick').includes(`'${tabName}'`)
+        );
+        if (activeTab) activeTab.classList.add('active');
+    }
+
+    // Handle initial tab based on URL fragment
+    window.addEventListener('load', () => {
+        const hash = window.location.hash.replace('#', '');
+        if (hash === 'orders' || hash === 'reports') {
+            switchTab(hash);
+        }
+    });
+
+    // Also handle hash change without refresh
+    window.addEventListener('hashchange', () => {
+        const hash = window.location.hash.replace('#', '');
+        if (hash === 'orders' || hash === 'reports') {
+            switchTab(hash);
+        }
+    });
+</script>
+{% endblock %}

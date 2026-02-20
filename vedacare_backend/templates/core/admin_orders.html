@@ -1,0 +1,309 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Order Analytics - VedaCare Admin{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --admin-primary: #1e293b;
+        --admin-accent: #3b82f6;
+        --admin-bg: #f8fafc;
+    }
+
+    .admin-container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: var(--admin-bg);
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+    }
+
+    .admin-sidebar {
+        background: white;
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .sidebar-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--gray-400);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    .admin-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .admin-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1.25rem;
+        border-radius: var(--radius-lg);
+        color: var(--gray-600);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .admin-nav-item i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .admin-nav-item:hover {
+        background: var(--gray-50);
+        color: var(--admin-primary);
+    }
+
+    .admin-nav-item.active {
+        background: var(--admin-primary);
+        color: white;
+    }
+
+    .admin-main {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title h1 {
+        font-size: 2rem;
+        color: var(--admin-primary);
+        font-family: var(--font-display);
+    }
+
+    .content-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-100);
+        padding: 2rem;
+    }
+
+    .order-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .order-table th {
+        background: var(--gray-50);
+        padding: 1rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--gray-500);
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .order-table td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid var(--gray-100);
+        color: var(--gray-700);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.375rem 0.875rem;
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        font-weight: 700;
+    }
+
+    .status-packed {
+        background: #fff7ed;
+        color: #9a3412;
+    }
+
+    .status-shipped {
+        background: #eff6ff;
+        color: #1e40af;
+    }
+
+    .status-delivered {
+        background: #ecfdf5;
+        color: #065f46;
+    }
+
+    .action-btn-sm {
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+        background: white;
+        color: var(--gray-600);
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .action-btn-sm:hover {
+        background: var(--admin-accent);
+        color: white;
+        border-color: var(--admin-accent);
+    }
+
+    .status-select {
+        padding: 0.4rem;
+        height: auto;
+    }
+</style>
+
+<div class="admin-container">
+    <aside class="admin-sidebar">
+        <div class="sidebar-title">Admin Modules</div>
+        <nav class="admin-nav">
+            <a href="{% url 'admin_analytics' %}" class="admin-nav-item">
+                <i class="fas fa-chart-pie"></i> Analytics Hub
+            </a>
+            <a href="{% url 'admin_users' %}" class="admin-nav-item">
+                <i class="fas fa-users"></i> User Management
+            </a>
+            <a href="{% url 'admin_plants' %}" class="admin-nav-item">
+                <i class="fas fa-leaf"></i> Plant Database
+            </a>
+            <a href="{% url 'admin_orders' %}" class="admin-nav-item active">
+                <i class="fas fa-shopping-cart"></i> Order Tracking
+            </a>
+            <a href="{% url 'profile' %}" class="admin-nav-item">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+            <a href="{% url 'dashboard' %}" class="admin-nav-item">
+                <i class="fas fa-shield-alt"></i> Security & Logs
+            </a>
+            <a href="{% url 'dashboard' %}" class="admin-nav-item"
+                style="margin-top: 2rem; border-top: 1px solid var(--gray-100); padding-top: 1.5rem;">
+                <i class="fas fa-arrow-left"></i> Exit Admin
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Order Management (Admin)</h1>
+                <p>Track fulfillment and manage product logistics.</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="action-btn-sm" style="background: white;"><i class="fas fa-filter"></i> Filters</button>
+                <button class="btn-primary-admin"
+                    style="padding: 0.875rem 1.5rem; border-radius: var(--radius-lg); border: none; font-weight: 700; cursor: pointer; color: white; background: var(--admin-primary);">
+                    Download Manifest
+                </button>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Rating</th>
+                        <th>Date Ordered</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td><strong>#VEDA-{{ order.id }}</strong></td>
+                        <td>
+                            <div style="color: var(--gray-900); font-weight: 600;">{{ order.customer_name }}</div>
+                            <div style="font-size: 0.85rem; color: var(--gray-500);">{{ order.items.count }} items</div>
+                        </td>
+                        <td><strong style="color: var(--gray-900);">₹{{ order.total_price }}</strong></td>
+                        <td>
+                            <span class="status-badge status-{{ order.status|lower }}">
+                                <i
+                                    class="fas {% if order.status == 'Delivered' %}fa-check-circle{% elif order.status == 'Shipped' %}fa-truck{% else %}fa-box{% endif %}"></i>
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if order.rating %}
+                            <div style="color: #f59e0b; font-weight: 700; font-size: 0.9rem;">
+                                <i class="fas fa-star"></i> {{ order.rating }}
+                            </div>
+                            {% if order.review %}
+                            <div title="{{ order.review }}"
+                                style="font-size: 0.75rem; color: var(--gray-500); max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                "{{ order.review }}"
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            <span style="color: var(--gray-400);">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ order.ordered_at|date:"M d, Y" }}</td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <form method="POST" style="margin: 0; display: flex; gap: 0.5rem;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                                    <!-- Verbose Option Selection: Immune to auto-formatter splitting tags -->
+                                    <select name="status" class="action-btn-sm status-select"
+                                        onchange="this.form.submit()">
+                                        {% if "Packed" in order.status %}
+                                        <option value="Packed" selected>Packed</option>
+                                        {% else %}
+                                        <option value="Packed">Packed</option>
+                                        {% endif %}
+
+                                        {% if "Shipped" in order.status %}
+                                        <option value="Shipped" selected>Shipped</option>
+                                        {% else %}
+                                        <option value="Shipped">Shipped</option>
+                                        {% endif %}
+
+                                        {% if "Delivered" in order.status %}
+                                        <option value="Delivered" selected>Delivered</option>
+                                        {% else %}
+                                        <option value="Delivered">Delivered</option>
+                                        {% endif %}
+                                    </select>
+                                </form>
+                                <button class="action-btn-sm" style="width: 38px; padding: 0;" title="View Items">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 5rem 0; color: var(--gray-400);">
+                            <i class="fas fa-shopping-basket fa-3x" style="display: block; margin-bottom: 1rem;"></i>
+                            No orders have been placed yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+{% endblock %}

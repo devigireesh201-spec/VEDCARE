@@ -1,0 +1,310 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Herbal Library - VedaCare{% endblock %}
+
+{% block content %}
+<style>
+    .library-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .library-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .library-title {
+        font-size: 2.5rem;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+        font-family: var(--font-display);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .library-subtitle {
+        font-size: 1.125rem;
+        color: var(--gray-600);
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .search-filter-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2.5rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-full);
+        font-family: var(--font-primary);
+        transition: all 0.3s ease;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%239ca3af" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>') no-repeat 0.75rem center;
+        background-size: 1.25rem;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    .herbs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+
+    .herb-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        transition: all 0.4s ease;
+        border: 2px solid transparent;
+        animation: scaleIn 0.4s ease-out;
+    }
+
+    .herb-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-2xl);
+        border-color: var(--primary-200);
+    }
+
+    .herb-image {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+    }
+
+    .herb-body {
+        padding: 1.5rem;
+    }
+
+    .herb-badge {
+        display: inline-block;
+        padding: 0.375rem 0.875rem;
+        background: var(--primary-100);
+        color: var(--primary-700);
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+    }
+
+    .herb-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+    }
+
+    .herb-scientific {
+        font-size: 0.875rem;
+        font-style: italic;
+        color: var(--gray-500);
+        margin-bottom: 1rem;
+    }
+
+    .herb-divider {
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-500) 0%, transparent 100%);
+        margin: 1rem 0;
+    }
+
+    .herb-section {
+        margin-bottom: 1rem;
+    }
+
+    .herb-section-title {
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .herb-section-content {
+        color: var(--gray-600);
+        line-height: 1.7;
+        font-size: 0.95rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--gray-300);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--gray-500);
+    }
+
+    @media (max-width: 768px) {
+        .library-container {
+            padding: 2rem 1rem;
+        }
+
+        .library-title {
+            font-size: 2rem;
+            flex-direction: column;
+        }
+
+        .herbs-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="library-container">
+    <div class="library-header">
+        <div
+            style="display: inline-block; padding: 0.5rem 1rem; background: var(--primary-100); color: var(--primary-700); border-radius: var(--radius-full); font-weight: 700; font-size: 0.85rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            Module 5: Plant Information
+        </div>
+        <h1 class="library-title">
+            <i class="fas fa-book-medical"></i>
+            Herbal Encyclopedia
+        </h1>
+        <p class="library-subtitle">
+            Discover the healing power of traditional Ayurvedic herbs and their medicinal properties
+        </p>
+    </div>
+
+    <div class="search-filter-section">
+        <div class="search-box">
+            <input type="text" class="search-input" id="herb-search" placeholder="Search for herbs...">
+        </div>
+    </div>
+
+    <div class="herbs-grid" id="herbs-grid">
+        {% for herb in herbs %}
+        <div class="herb-card" data-name="{{ herb.name|lower }}">
+            {% if herb.image %}
+            <img src="{{ herb.image.url }}" alt="{{ herb.name }}" class="herb-image">
+            {% else %}
+            <div class="herb-image"
+                style="display: flex; align-items: center; justify-content: center; font-size: 4rem;">
+                🌿
+            </div>
+            {% endif %}
+
+            <div class="herb-body">
+                <span class="herb-badge">
+                    <i class="fas fa-leaf"></i> Medicinal Herb
+                </span>
+
+                <h3 class="herb-name">{{ herb.name }}</h3>
+                <p class="herb-scientific">{{ herb.scientific_name }}</p>
+
+                <div class="herb-divider"></div>
+
+                <div class="herb-section">
+                    <div class="herb-section-title">
+                        <i class="fas fa-heart"></i>
+                        Medicinal Uses
+                    </div>
+                    <div class="herb-section-content">
+                        {{ herb.medicinal_use }}
+                    </div>
+                </div>
+
+                {% if herb.properties %}
+                <div class="herb-section">
+                    <div class="herb-section-title">
+                        <i class="fas fa-flask"></i>
+                        Properties
+                    </div>
+                    <div class="herb-section-content">
+                        {{ herb.properties }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if herb.preparation_method %}
+                <div class="herb-section">
+                    <div class="herb-section-title">
+                        <i class="fas fa-mortar-pestle"></i>
+                        How to Use
+                    </div>
+                    <div class="herb-section-content">
+                        {{ herb.preparation_method }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if herb.precautions %}
+                <div class="herb-section">
+                    <div class="herb-section-title" style="color: var(--warning);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Precautions
+                    </div>
+                    <div class="herb-section-content" style="color: var(--warning);">
+                        {{ herb.precautions }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state" style="grid-column: 1 / -1;">
+            <i class="fas fa-seedling"></i>
+            <h3>No Herbs Available</h3>
+            <p>The herbal library is being updated. Check back soon!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Search functionality
+    document.getElementById('herb-search').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const herbs = document.querySelectorAll('.herb-card');
+
+        herbs.forEach(herb => {
+            const name = herb.dataset.name;
+            if (name.includes(searchTerm)) {
+                herb.style.display = 'block';
+            } else {
+                herb.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

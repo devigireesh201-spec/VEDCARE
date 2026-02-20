@@ -1,0 +1,514 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Symptom Checker - VedaCare{% endblock %}
+
+{% block content %}
+<style>
+    .symptoms-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+        font-family: var(--font-display);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+        color: var(--gray-600);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .symptoms-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-xl);
+        animation: scaleIn 0.5s ease-out;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .input-label {
+        display: block;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 1rem;
+    }
+
+    .symptom-input {
+        width: 100%;
+        min-height: 150px;
+        padding: 1.25rem;
+        font-family: var(--font-primary);
+        font-size: 1rem;
+        color: var(--gray-800);
+        background: var(--gray-50);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        resize: vertical;
+        transition: all 0.3s ease;
+    }
+
+    .symptom-input:focus {
+        outline: none;
+        border-color: var(--primary-500);
+        background: white;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+
+    .symptom-input::placeholder {
+        color: var(--gray-400);
+    }
+
+    .char-counter {
+        text-align: right;
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-top: 0.5rem;
+    }
+
+    .quick-symptoms {
+        margin-top: 1.5rem;
+    }
+
+    .quick-symptoms-label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .symptom-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .symptom-tag {
+        padding: 0.5rem 1rem;
+        background: var(--gray-100);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        color: var(--gray-700);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        user-select: none;
+    }
+
+    .symptom-tag:hover {
+        background: var(--primary-50);
+        border-color: var(--primary-300);
+        color: var(--primary-700);
+    }
+
+    .symptom-tag.active {
+        background: var(--gradient-primary);
+        border-color: var(--primary-600);
+        color: white;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1.25rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        box-shadow: var(--shadow-md);
+        margin-top: 2rem;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        box-shadow: var(--shadow-xl), var(--shadow-glow);
+        transform: translateY(-2px);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .submit-btn.analyzing {
+        background: var(--gray-400);
+    }
+
+    .disclaimer {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: #fef3c7;
+        border-left: 4px solid var(--warning);
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        color: #92400e;
+    }
+
+    .disclaimer i {
+        margin-right: 0.5rem;
+    }
+
+    /* Result Section */
+    .result-section {
+        margin-top: 2.5rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
+        border-radius: var(--radius-xl);
+        border: 2px solid var(--primary-200);
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .result-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--primary-200);
+    }
+
+    .result-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--gradient-primary);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .result-title {
+        font-size: 1.5rem;
+        color: var(--primary-700);
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .result-content {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .result-item {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .result-item-title {
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.125rem;
+    }
+
+    .result-item-content {
+        color: var(--gray-600);
+        line-height: 1.7;
+    }
+
+    .remedy-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .remedy-list li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--gray-100);
+        display: flex;
+        align-items: start;
+        gap: 0.75rem;
+    }
+
+    .remedy-list li:last-child {
+        border-bottom: none;
+    }
+
+    .remedy-list li::before {
+        content: '🌿';
+        flex-shrink: 0;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .symptoms-container {
+            padding: 2rem 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            flex-direction: column;
+        }
+
+        .symptoms-card {
+            padding: 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="symptoms-container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-stethoscope"></i>
+            AI Symptom Analyzer
+        </h1>
+        <p class="page-subtitle">
+            Bridging ancient wisdom with AI for your wellness
+        </p>
+    </div>
+
+    <div class="symptoms-card">
+        <h2
+            style="font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--primary-600); border-bottom: 1px solid var(--gray-100); padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span
+                style="background: var(--primary-500); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">2</span>
+            Symptom Input Module
+        </h2>
+        <form method="POST" id="symptom-form">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <label for="symptoms" class="input-label">
+                    Describe Your Symptoms
+                </label>
+                <textarea name="symptoms" id="symptoms" class="symptom-input"
+                    placeholder="Example: I have a persistent headache, feeling tired, and experiencing mild fever since yesterday..."
+                    required maxlength="500"></textarea>
+                <div class="char-counter">
+                    <span id="char-count">0</span> / 500 characters
+                </div>
+            </div>
+
+            <div class="quick-symptoms">
+                <label class="quick-symptoms-label">
+                    <i class="fas fa-bolt"></i> Quick Select Common Symptoms:
+                </label>
+                <div class="symptom-tags">
+                    <span class="symptom-tag" data-symptom="headache">Headache</span>
+                    <span class="symptom-tag" data-symptom="fever">Fever</span>
+                    <span class="symptom-tag" data-symptom="cough">Cough</span>
+                    <span class="symptom-tag" data-symptom="cold">Cold</span>
+                    <span class="symptom-tag" data-symptom="stomach pain">Stomach Pain</span>
+                    <span class="symptom-tag" data-symptom="fatigue">Fatigue</span>
+                    <span class="symptom-tag" data-symptom="nausea">Nausea</span>
+                    <span class="symptom-tag" data-symptom="joint pain">Joint Pain</span>
+                    <span class="symptom-tag" data-symptom="insomnia">Insomnia</span>
+                    <span class="symptom-tag" data-symptom="anxiety">Anxiety</span>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                <i class="fas fa-search"></i>
+                Analyze Symptoms
+            </button>
+
+            <div class="disclaimer">
+                <i class="fas fa-info-circle"></i>
+                <strong>Disclaimer:</strong> This is an AI-powered preliminary analysis based on Ayurvedic principles.
+                For serious health concerns, please consult a qualified healthcare professional or Ayurvedic
+                practitioner.
+            </div>
+        </form>
+    </div>
+
+    {% if prediction %}
+    <div class="result-section">
+        <div class="result-header">
+            <div class="result-icon">✅</div>
+            <h3 class="result-title">Analysis Complete</h3>
+        </div>
+
+        <div class="result-content">
+            <!-- Module 3: Disease Prediction -->
+            <div class="result-item" style="border-left: 4px solid #ef4444;">
+                <h2
+                    style="font-size: 1rem; margin-bottom: 0.75rem; color: #ef4444; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">
+                    Module 3: Disease Prediction
+                </h2>
+                <div class="result-item-title">
+                    <i class="fas fa-diagnoses"></i>
+                    Condition Analysis Result
+                </div>
+                <div class="result-item-content">
+                    <strong style="font-size: 1.25rem; color: #ef4444;">{{ prediction }}</strong>
+                </div>
+            </div>
+
+            <!-- Module 4: Ayurvedic Treatment Suggestion -->
+            <div class="result-item" style="border-left: 4px solid #10b981;">
+                <h2
+                    style="font-size: 1rem; margin-bottom: 0.75rem; color: #10b981; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">
+                    Module 4: Treatment Suggestion
+                </h2>
+                <div class="result-item-title">
+                    <i class="fas fa-leaf"></i>
+                    Holistic Remedy Plan
+                </div>
+                <div class="result-item-content" style="margin-bottom: 1.5rem;">
+                    {{ remedy }}
+                </div>
+
+                {% if preparation %}
+                <div class="result-item-title"
+                    style="color: #059669; font-size: 1rem; border-top: 1px solid var(--gray-100); padding-top: 1rem;">
+                    <i class="fas fa-mortar-pestle"></i>
+                    Preparation Method
+                </div>
+                <div class="result-item-content" style="font-style: italic; font-size: 0.95rem;">
+                    {{ preparation }}
+                </div>
+                {% endif %}
+            </div>
+
+            {% if recommended_plants %}
+            <div class="result-item">
+                <div class="result-item-title">
+                    <i class="fas fa-seedling"></i>
+                    Recommended Herbal Plants
+                </div>
+                <ul class="remedy-list">
+                    {% for plant in recommended_plants %}
+                    <li>
+                        <div>
+                            <strong>{{ plant.name }}</strong> ({{ plant.scientific_name }})<br>
+                            <span style="font-size: 0.875rem; color: var(--gray-500);">
+                                {{ plant.medicinal_use|truncatewords:15 }}
+                            </span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'ekart' %}" class="btn btn-primary" style="flex: 1;">
+                <i class="fas fa-shopping-cart"></i>
+                Buy Recommended Plants
+            </a>
+            <button onclick="window.location.reload()" class="btn btn-secondary" style="flex: 1;">
+                <i class="fas fa-redo"></i>
+                New Analysis
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Character counter
+    const textarea = document.getElementById('symptoms');
+    const charCount = document.getElementById('char-count');
+
+    textarea.addEventListener('input', () => {
+        charCount.textContent = textarea.value.length;
+    });
+
+    // Quick symptom tags
+    const symptomTags = document.querySelectorAll('.symptom-tag');
+    const selectedSymptoms = new Set();
+
+    symptomTags.forEach(tag => {
+        tag.addEventListener('click', () => {
+            const symptom = tag.dataset.symptom;
+
+            if (selectedSymptoms.has(symptom)) {
+                selectedSymptoms.delete(symptom);
+                tag.classList.remove('active');
+            } else {
+                selectedSymptoms.add(symptom);
+                tag.classList.add('active');
+            }
+
+            updateTextarea();
+        });
+    });
+
+    function updateTextarea() {
+        const currentText = textarea.value;
+        const symptomsArray = Array.from(selectedSymptoms);
+
+        if (symptomsArray.length > 0) {
+            const symptomsText = symptomsArray.join(', ');
+            if (currentText && !currentText.includes(symptomsText)) {
+                textarea.value = currentText + (currentText ? ', ' : '') + symptomsText;
+            } else if (!currentText) {
+                textarea.value = 'I am experiencing ' + symptomsText;
+            }
+        }
+
+        charCount.textContent = textarea.value.length;
+    }
+
+    // Form submission animation
+    const form = document.getElementById('symptom-form');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', (e) => {
+        if (textarea.value.trim().length < 10) {
+            e.preventDefault();
+            alert('Please provide more details about your symptoms (at least 10 characters).');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.classList.add('analyzing');
+        submitBtn.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Analyzing...';
+    });
+</script>
+{% endblock %}

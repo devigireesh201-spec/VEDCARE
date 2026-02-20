@@ -1,0 +1,391 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Admin Profile - VedaCare{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --admin-primary: #1e293b;
+        --admin-accent: #6366f1;
+        --admin-bg: #f8fafc;
+        --admin-success: #10b981;
+    }
+
+    .admin-container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: var(--admin-bg);
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+    }
+
+    /* Admin Sidebar (Same as Analytics for consistency) */
+    .admin-sidebar {
+        background: white;
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .sidebar-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--gray-400);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    .admin-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .admin-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1.25rem;
+        border-radius: var(--radius-lg);
+        color: var(--gray-600);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .admin-nav-item i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .admin-nav-item:hover {
+        background: var(--gray-50);
+        color: var(--admin-primary);
+    }
+
+    .admin-nav-item.active {
+        background: var(--admin-primary);
+        color: white;
+    }
+
+    /* Profile Main Content */
+    .profile-header-premium {
+        background: var(--admin-primary);
+        color: white;
+        padding: 3rem;
+        border-radius: var(--radius-2xl);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header-premium::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+    }
+
+    .admin-identity {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .admin-avatar-hex {
+        width: 100px;
+        height: 100px;
+        background: var(--admin-accent);
+        clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .admin-info-text h1 {
+        font-size: 2rem;
+        margin-bottom: 0.25rem;
+        font-family: var(--font-display);
+    }
+
+    .admin-badge-pro {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.4rem 1rem;
+        border-radius: var(--radius-full);
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .profile-grid-system {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    .admin-form-card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-100);
+    }
+
+    .section-heading {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--admin-primary);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 1px solid var(--gray-100);
+        padding-bottom: 1rem;
+    }
+
+    .admin-input-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .admin-input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .admin-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--gray-500);
+        text-transform: uppercase;
+    }
+
+    .admin-input {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        font-size: 1rem;
+        transition: all 0.2s;
+        background: #fafafa;
+    }
+
+    .admin-input:focus {
+        border-color: var(--admin-accent);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        background: white;
+    }
+
+    .save-profile-btn {
+        background: var(--admin-primary);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: var(--radius-lg);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        width: fit-content;
+    }
+
+    .save-profile-btn:hover {
+        background: #0f172a;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .system-stats-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .quick-stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--gray-100);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon-mini {
+        width: 45px;
+        height: 45px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .stat-meta h4 {
+        font-size: 0.75rem;
+        color: var(--gray-400);
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    .stat-meta p {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--admin-primary);
+        margin: 0;
+    }
+
+    @media (max-width: 1024px) {
+        .admin-container {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-grid-system {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="admin-container">
+    <aside class="admin-sidebar">
+        <div class="sidebar-title">Management</div>
+        <nav class="admin-nav">
+            <a href="{% url 'admin_analytics' %}" class="admin-nav-item">
+                <i class="fas fa-chart-pie"></i> Analytics Hub
+            </a>
+            <a href="{% url 'admin_users' %}" class="admin-nav-item">
+                <i class="fas fa-users"></i> Users
+            </a>
+            <a href="{% url 'admin_plants' %}" class="admin-nav-item">
+                <i class="fas fa-leaf"></i> Plants
+            </a>
+            <a href="{% url 'admin_orders' %}" class="admin-nav-item">
+                <i class="fas fa-shopping-cart"></i> Orders
+            </a>
+            <a href="{% url 'profile' %}" class="admin-nav-item active">
+                <i class="fas fa-user-circle"></i> My Profile
+            </a>
+            <a href="{% url 'dashboard' %}" class="admin-nav-item"
+                style="margin-top: 2rem; border-top: 1px solid var(--gray-100); padding-top: 1.5rem;">
+                <i class="fas fa-arrow-left"></i> Exit Admin
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        <div class="profile-header-premium">
+            <div class="admin-identity">
+                <div class="admin-avatar-hex">
+                    <i class="fas fa-shield-user"></i>
+                </div>
+                <div class="admin-info-text">
+                    <div class="admin-badge-pro"><i class="fas fa-crown"></i> System Administrator</div>
+                    <h1>{{ user.get_full_name|default:user.username }}</h1>
+                    <p style="opacity: 0.7;">VedaCare Operational Manager • Since {{ user.date_joined|date:"M Y" }}</p>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">Last Login</div>
+                <div style="font-weight: 700;">{{ user.last_login|date:"M d, H:i" }}</div>
+            </div>
+        </div>
+
+        <div class="profile-grid-system">
+            <div class="admin-form-card">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="section-heading">
+                        <i class="fas fa-user-gear"></i> Account Configuration
+                    </div>
+
+                    <div class="admin-input-grid">
+                        <div class="admin-input-group">
+                            <label class="admin-label">First Name</label>
+                            <input type="text" name="first_name" class="admin-input" value="{{ user.first_name }}">
+                        </div>
+                        <div class="admin-input-group">
+                            <label class="admin-label">Last Name</label>
+                            <input type="text" name="last_name" class="admin-input" value="{{ user.last_name }}">
+                        </div>
+                        <div class="admin-input-group" style="grid-column: span 2;">
+                            <label class="admin-label">Official Email Address</label>
+                            <input type="email" name="email" class="admin-input" value="{{ user.email }}">
+                        </div>
+                    </div>
+
+                    <div class="section-heading" style="margin-top: 3rem;">
+                        <i class="fas fa-address-card"></i> Professional Bio
+                    </div>
+
+                    <div class="admin-input-group">
+                        <label class="admin-label">Professional Summary</label>
+                        <textarea name="medical_history" rows="4" class="admin-input"
+                            placeholder="Enter your professional bio or responsibilities...">{{ profile.medical_history }}</textarea>
+                    </div>
+
+                    <button type="submit" class="save-profile-btn">
+                        <i class="fas fa-cloud-upload-alt"></i> Update Identity
+                    </button>
+                </form>
+            </div>
+
+            <div class="system-stats-sidebar">
+                <div class="quick-stat-card">
+                    <div class="stat-icon-mini" style="background: #e0f2fe; color: #0369a1;">
+                        <i class="fas fa-users-viewfinder"></i>
+                    </div>
+                    <div class="stat-meta">
+                        <h4>Patient Registry</h4>
+                        <p>{{ total_users|default:"0" }} Active</p>
+                    </div>
+                </div>
+                <div class="quick-stat-card">
+                    <div class="stat-icon-mini" style="background: #ecfdf5; color: #047857;">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="stat-meta">
+                        <h4>Platform Sales</h4>
+                        <p>{{ total_orders|default:"0" }} Total</p>
+                    </div>
+                </div>
+                <div class="quick-stat-card">
+                    <div class="stat-icon-mini" style="background: #fdf2f8; color: #be185d;">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="stat-meta">
+                        <h4>Security Level</h4>
+                        <p>Standard</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

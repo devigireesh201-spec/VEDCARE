@@ -1,0 +1,640 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Plant Identification - VedaCare{% endblock %}
+
+{% block content %}
+<style>
+    .identify-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+        font-family: var(--font-display);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+        color: var(--gray-600);
+    }
+
+    .scanner-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+        animation: scaleIn 0.5s ease-out;
+    }
+
+    .camera-container {
+        position: relative;
+        background: #000;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    #webcam {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .camera-placeholder {
+        width: 100%;
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+        color: var(--gray-600);
+    }
+
+    .camera-placeholder i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: var(--gray-400);
+    }
+
+    .scanner-overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .scanner-overlay.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .scan-line {
+        width: 100%;
+        height: 3px;
+        background: var(--primary-500);
+        box-shadow: 0 0 20px var(--primary-500);
+        position: absolute;
+        top: 0;
+        animation: scan 2s linear infinite;
+    }
+
+    @keyframes scan {
+        0% {
+            top: 0;
+        }
+
+        100% {
+            top: 100%;
+        }
+    }
+
+    .scan-text {
+        color: white;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-top: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .spinner {
+        width: 30px;
+        height: 30px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-camera {
+        flex: 1;
+        padding: 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .btn-start {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-start:hover:not(:disabled) {
+        box-shadow: var(--shadow-xl);
+        transform: translateY(-2px);
+    }
+
+    .btn-capture {
+        background: var(--primary-600);
+        color: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-capture:hover:not(:disabled) {
+        background: var(--primary-700);
+        box-shadow: var(--shadow-xl);
+        transform: translateY(-2px);
+    }
+
+    .btn-camera:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .upload-option {
+        text-align: center;
+        padding: 1.5rem;
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        border: 2px dashed var(--gray-300);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .upload-option:hover {
+        border-color: var(--primary-500);
+        background: var(--primary-50);
+    }
+
+    .upload-option input[type="file"] {
+        display: none;
+    }
+
+    .upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+    }
+
+    .upload-label i {
+        font-size: 2rem;
+        color: var(--primary-600);
+    }
+
+    /* Result Card */
+    .result-card {
+        margin-top: 2rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
+        border-radius: var(--radius-xl);
+        border: 2px solid var(--primary-200);
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .result-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--primary-200);
+    }
+
+    .result-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--gradient-primary);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .result-title {
+        font-size: 1.5rem;
+        color: var(--primary-700);
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .result-info {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--gray-700);
+        min-width: 150px;
+    }
+
+    .info-value {
+        color: var(--gray-600);
+        flex: 1;
+    }
+
+    .confidence-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--gray-200);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+
+    .confidence-fill {
+        height: 100%;
+        background: var(--gradient-primary);
+        border-radius: var(--radius-full);
+        transition: width 1s ease-out;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .identify-container {
+            padding: 2rem 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            flex-direction: column;
+        }
+
+        #webcam,
+        .camera-placeholder {
+            height: 300px;
+        }
+
+        .button-group {
+            flex-direction: column;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .info-item {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            min-width: auto;
+        }
+    }
+</style>
+
+<div class="identify-container">
+    <div class="page-header">
+        <div
+            style="display: inline-block; padding: 0.5rem 1rem; background: var(--primary-100); color: var(--primary-700); border-radius: var(--radius-full); font-weight: 700; font-size: 0.85rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">
+            Module 7: Plant Verification
+        </div>
+        <h1 class="page-title">
+            <i class="fas fa-search-plus"></i>
+            AI Plant Verification
+        </h1>
+        <p class="page-subtitle">
+            Verify medicinal plants using AI vision technology
+        </p>
+    </div>
+
+    <div class="scanner-card">
+        <div class="camera-container">
+            <div class="camera-placeholder" id="placeholder">
+                <i class="fas fa-leaf"></i>
+                <p>Camera will appear here</p>
+            </div>
+            <video id="webcam" autoplay playsinline style="display: none;"></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+
+            <div class="scanner-overlay" id="scanner-overlay">
+                <div class="scan-line"></div>
+                <div class="scan-text">
+                    <div class="spinner"></div>
+                    Analyzing Plant...
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="start-camera" class="btn-camera btn-start">
+                <i class="fas fa-video"></i>
+                Start Camera
+            </button>
+            <button id="capture" class="btn-camera btn-capture" disabled>
+                <i class="fas fa-camera"></i>
+                Capture & Analyze
+            </button>
+        </div>
+
+        <div class="upload-option">
+            <label for="file-upload" class="upload-label">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span style="font-weight: 600; color: var(--gray-700);">Or Upload an Image</span>
+                <span style="font-size: 0.875rem; color: var(--gray-500);">Click to browse files</span>
+            </label>
+            <input type="file" id="file-upload" accept="image/*" onchange="handleFileUpload(this)">
+        </div>
+
+        <form id="identify-form" method="POST" enctype="multipart/form-data" style="display: none;">
+            {% csrf_token %}
+            <input type="file" name="plant_image" id="hidden-file">
+            <input type="hidden" name="latitude" id="lat-input">
+            <input type="hidden" name="longitude" id="lon-input">
+        </form>
+
+        <!-- Scanning Tips -->
+        <div
+            style="margin-top: 2rem; padding: 1rem; background: var(--primary-50); border-radius: var(--radius-lg); font-size: 0.875rem; border-left: 4px solid var(--primary-500);">
+            <div
+                style="font-weight: 700; color: var(--primary-700); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-lightbulb"></i> Tips for Higher Accuracy:
+            </div>
+            <ul
+                style="margin: 0; padding-left: 1.25rem; color: var(--primary-900); display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                <li>Get close to the leaves/flowers</li>
+                <li>Ensure bright, natural lighting</li>
+                <li>Hold the camera steady for 1-2s</li>
+                <li>Remove any debris or background noise</li>
+            </ul>
+        </div>
+    </div>
+
+    {% if result %}
+    <div class="result-card">
+        <div class="result-header">
+            <div class="result-icon">✅</div>
+            <h3 class="result-title">Plant Identified Successfully!</h3>
+            {% if result.is_virtual %}
+            <span class="badge badge-warning" style="margin-left: auto;">AI Analysis</span>
+            {% else %}
+            <span class="badge badge-success" style="margin-left: auto;">In Database</span>
+            {% endif %}
+        </div>
+
+        <div class="result-info">
+            <div class="info-item">
+                <span class="info-label">Plant Name:</span>
+                <span class="info-value" style="font-weight: 600; color: var(--primary-700); font-size: 1.125rem;">
+                    {{ result.name }}
+                </span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Scientific Name:</span>
+                <span class="info-value" style="font-style: italic;">
+                    {{ result.scientific_name }}
+                </span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Confidence Score:</span>
+                <div class="info-value">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-weight: 600; color: var(--primary-600);">{{ confidence }}%</span>
+                        {% if confidence > 85 %}
+                        <span class="badge badge-success">High Accuracy</span>
+                        {% elif confidence > 50 %}
+                        <span class="badge badge-warning">Medium Accuracy</span>
+                        {% else %}
+                        <span class="badge badge-error">Low Confidence</span>
+                        {% endif %}
+                    </div>
+                    {% if ai_debug %}
+                    <div style="font-size: 0.75rem; color: var(--gray-400); margin-top: 0.25rem;">
+                        AI Detection: {{ ai_debug }}
+                    </div>
+                    {% endif %}
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" data-confidence="{{ confidence }}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Medicinal Uses:</span>
+                <span class="info-value">{{ result.medicinal_use }}</span>
+            </div>
+
+            {% if all_suggestions and result.is_virtual %}
+            <div style="margin-top: 1rem; padding: 1rem; background: var(--gray-50); border-radius: var(--radius-lg);">
+                <span
+                    style="font-size: 0.875rem; font-weight: 600; color: var(--gray-500); display: block; margin-bottom: 0.5rem;">
+                    Other possible matches:
+                </span>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    {% for sugg in all_suggestions|slice:"1:4" %}
+                    <span class="badge"
+                        style="background: white; border: 1px solid var(--gray-200); color: var(--gray-600);">
+                        {{ sugg.name }} ({{ sugg.probability }}%)
+                    </span>
+                    {% endfor %}
+                </div>
+                <p style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.75rem;">
+                    <i class="fas fa-info-circle"></i> If one of these is your plant, you can add it to your library in
+                    the Admin panel for full details.
+                </p>
+            </div>
+            {% endif %}
+
+            {% if result.preparation_method %}
+            <div class="info-item">
+                <span class="info-label">How to Use:</span>
+                <span class="info-value">{{ result.preparation_method }}</span>
+            </div>
+            {% endif %}
+
+            {% if result.precautions %}
+            <div class="info-item">
+                <span class="info-label">⚠️ Precautions:</span>
+                <span class="info-value" style="color: var(--warning);">{{ result.precautions }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="action-buttons">
+            {% if result.is_virtual %}
+            <a href="{% url 'remedies' %}" class="btn btn-secondary" style="flex: 1;">
+                <i class="fas fa-book-medical"></i>
+                Browse Library
+            </a>
+            {% else %}
+            <a href="{% url 'ekart' %}" class="btn btn-primary" style="flex: 1;">
+                <i class="fas fa-shopping-cart"></i>
+                Buy This Plant
+            </a>
+            {% endif %}
+            <button onclick="window.location.reload()" class="btn btn-secondary" style="flex: 1;">
+                <i class="fas fa-redo"></i>
+                Scan Another
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas');
+    const placeholder = document.getElementById('placeholder');
+    const startBtn = document.getElementById('start-camera');
+    const captureBtn = document.getElementById('capture');
+    const overlay = document.getElementById('scanner-overlay');
+    const hiddenFile = document.getElementById('hidden-file');
+    const form = document.getElementById('identify-form');
+    let stream = null;
+
+    // Geolocation setup
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            document.getElementById('lat-input').value = position.coords.latitude;
+            document.getElementById('lon-input').value = position.coords.longitude;
+            console.log("Location captured for AI precision");
+        });
+    }
+
+    // Set confidence bar width on page load
+    const confidenceFill = document.querySelector('.confidence-fill');
+    if (confidenceFill) {
+        const confidence = confidenceFill.getAttribute('data-confidence');
+        if (confidence) {
+            confidenceFill.style.width = confidence + '%';
+        }
+    }
+
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment", width: 1280, height: 720 }
+            });
+            video.srcObject = stream;
+            video.style.display = 'block';
+            placeholder.style.display = 'none';
+            captureBtn.disabled = false;
+            startBtn.innerHTML = '<i class="fas fa-video-slash"></i> Stop Camera';
+            startBtn.classList.remove('btn-start');
+            startBtn.style.background = 'var(--gray-600)';
+
+            // Remove previous listener if any and update to stop function
+            startBtn.removeEventListener('click', startCamera);
+            startBtn.addEventListener('click', stopCamera);
+        } catch (err) {
+            alert("Please allow camera access to use the plant scanner. Make sure your device has a camera.");
+            console.error("Camera error:", err);
+        }
+    }
+
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+            video.style.display = 'none';
+            placeholder.style.display = 'flex';
+            captureBtn.disabled = true;
+            startBtn.innerHTML = '<i class="fas fa-video"></i> Start Camera';
+            startBtn.classList.add('btn-start');
+            startBtn.style.background = '';
+
+            // Update back to start function
+            startBtn.removeEventListener('click', stopCamera);
+            startBtn.addEventListener('click', startCamera);
+            stream = null;
+        }
+    }
+
+    startBtn.addEventListener('click', startCamera);
+
+    captureBtn.addEventListener('click', () => {
+        overlay.classList.add('active');
+        captureBtn.disabled = true;
+
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob((blob) => {
+            const file = new File([blob], "plant_capture.jpg", { type: "image/jpeg" });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            hiddenFile.files = dataTransfer.files;
+
+            setTimeout(() => {
+                form.submit();
+            }, 2000);
+        }, 'image/jpeg', 0.95);
+    });
+
+    function handleFileUpload(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            hiddenFile.files = dataTransfer.files;
+
+            overlay.classList.add('active');
+            setTimeout(() => {
+                form.submit();
+            }, 1500);
+        }
+    }
+</script>
+{% endblock %}

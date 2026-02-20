@@ -1,0 +1,32 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('register/', views.register_view, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('symptoms/', views.symptom_checker, name='symptoms'),
+    path('remedies/', views.herbal_remedies, name='remedies'),
+    path('ekart/', views.ekart_view, name='ekart'),
+    path('history/', views.user_history, name='history'),
+    path('admin-analytics/', views.admin_analytics, name='admin_analytics'),
+    path('admin-users/', views.admin_users, name='admin_users'),
+    path('admin-plants/', views.admin_plants, name='admin_plants'),
+    path('admin-orders/', views.admin_orders, name='admin_orders'),
+    path('admin-conditions/', views.admin_conditions, name='admin_conditions'),
+    path('admin-plants/delete/<int:pk>/', views.delete_plant, name='delete_plant'),
+    path('admin-conditions/delete/<int:pk>/', views.delete_condition, name='delete_condition'),
+    path('admin-notifications/', views.admin_notifications, name='admin_notifications'),
+    path('admin-analytics/export-pdf/', views.export_sales_pdf, name='export_sales_pdf'),
+    path('identify/', views.identify_plant, name='identify_plant'),
+    path('checkout/', views.checkout_view, name='checkout'),
+    path('payment-success/', views.payment_success, name='payment_success'),
+    path('reset-password/', views.password_reset_view, name='password_reset'),
+    path('profile/', views.profile_view, name='profile'),
+    path('settings/', views.settings_view, name='settings'),
+    path('delete-account/', views.delete_account, name='delete_account'),
+    path('notifications/', views.notifications_view, name='notifications'),
+    path('rate-order/<int:order_id>/', views.rate_order, name='rate_order'),
+]

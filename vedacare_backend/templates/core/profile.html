@@ -1,0 +1,489 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Profile - VedaCare{% endblock %}
+
+{% block content %}
+<style>
+    .profile-master-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 4rem 2rem;
+        background: #fcfdfc;
+        min-height: 100vh;
+    }
+
+    /* Premium Profile Header */
+    .premium-profile-header {
+        background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+        border-radius: var(--radius-2xl);
+        padding: 4rem;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-profile-header::after {
+        content: '';
+        position: absolute;
+        bottom: -20%;
+        right: -5%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+    }
+
+    .user-brand {
+        display: flex;
+        align-items: center;
+        gap: 2.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .avatar-wrapper {
+        position: relative;
+    }
+
+    .avatar-main {
+        width: 140px;
+        height: 140px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 32% 68% 68% 32% / 32% 28% 72% 68%;
+        /* Organic shape */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        box-shadow: var(--shadow-2xl);
+        animation: morph 8s ease-in-out infinite;
+    }
+
+    @keyframes morph {
+        0% {
+            border-radius: 32% 68% 68% 32% / 32% 28% 72% 68%;
+        }
+
+        50% {
+            border-radius: 68% 32% 28% 72% / 72% 68% 32% 28%;
+        }
+
+        100% {
+            border-radius: 32% 68% 68% 32% / 32% 28% 72% 68%;
+        }
+    }
+
+    .online-indicator {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 25px;
+        height: 25px;
+        background: #10b981;
+        border: 4px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+    }
+
+    .header-details h1 {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        font-family: var(--font-display);
+        letter-spacing: -1px;
+    }
+
+    .user-meta-pills {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .meta-pill {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 1.25rem;
+        border-radius: var(--radius-full);
+        font-size: 0.85rem;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Standard Layout */
+    .profile-standard-grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 3rem;
+    }
+
+    .profile-nav-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--gray-100);
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .nav-section-label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--gray-400);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    .premium-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1.25rem;
+        border-radius: var(--radius-xl);
+        color: var(--gray-600);
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        margin-bottom: 0.5rem;
+    }
+
+    .premium-nav-item i {
+        font-size: 1.25rem;
+        width: 25px;
+        text-align: center;
+    }
+
+    .premium-nav-item:hover {
+        background: var(--gray-50);
+        color: var(--primary-600);
+        padding-left: 1.75rem;
+    }
+
+    .premium-nav-item.active {
+        background: var(--primary-50);
+        color: var(--primary-700);
+        box-shadow: inset 0 0 0 1px var(--primary-100);
+    }
+
+    .premium-nav-item.logout {
+        color: #ef4444;
+        margin-top: 2rem;
+        border-top: 1px solid var(--gray-50);
+        padding-top: 2rem;
+        border-radius: 0;
+    }
+
+    /* Main Content Styling */
+    .profile-form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+    }
+
+    .glass-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        padding: 3.5rem;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--gray-100);
+        position: relative;
+    }
+
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: var(--gradient-primary);
+        border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    }
+
+    .section-title-premium {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        margin-bottom: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-family: var(--font-display);
+    }
+
+    .section-title-premium span {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-100);
+        color: var(--primary-700);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    /* Input Styling overhaul */
+    .premium-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .input-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .input-wrapper label {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: var(--gray-700);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modern-input {
+        background: #f8fafc;
+        border: 2px solid #f1f5f9;
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-xl);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        color: var(--gray-900);
+        font-weight: 500;
+    }
+
+    .modern-input:focus {
+        background: white;
+        border-color: var(--primary-400);
+        box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.1);
+        outline: none;
+    }
+
+    .modern-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Profile Completion Widget */
+    .completion-widget {
+        background: white;
+        padding: 2rem;
+        border-radius: var(--radius-2xl);
+        margin-top: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-100);
+    }
+
+    .completion-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .completion-bar {
+        height: 10px;
+        background: var(--gray-100);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+    }
+
+    .completion-fill {
+        height: 100%;
+        background: var(--gradient-primary);
+        width: 85%;
+        /* Calculation based on fields */
+        border-radius: var(--radius-full);
+    }
+
+    .ultimate-save-btn {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.25rem 3.5rem;
+        border-radius: var(--radius-xl);
+        font-weight: 800;
+        font-size: 1.1rem;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+        transition: all 0.3s ease;
+        margin-top: 2rem;
+        align-self: flex-end;
+    }
+
+    .ultimate-save-btn:hover {
+        transform: scale(1.05) translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.5);
+    }
+
+    @media (max-width: 992px) {
+        .profile-standard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .premium-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .premium-profile-header {
+            flex-direction: column;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .user-brand {
+            flex-direction: column;
+        }
+
+        .user-meta-pills {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+<div class="profile-master-container">
+    <div class="premium-profile-header">
+        <div class="user-brand">
+            <div class="avatar-wrapper">
+                <div class="avatar-main">
+                    <i class="fas fa-user-astronaut"></i>
+                </div>
+                <div class="online-indicator"></div>
+            </div>
+            <div class="header-details">
+                <div class="user-meta-pills">
+                    <span class="meta-pill"><i class="fas fa-shield-check"></i> Verified Profile</span>
+                    <span class="meta-pill"><i class="fas fa-leaf"></i> Herbalist Level 1</span>
+                </div>
+                <h1>{{ user.get_full_name|default:user.username }}</h1>
+                <p style="opacity: 0.85; font-size: 1.1rem; font-weight: 500;">
+                    Member since {{ user.date_joined|date:"F d, Y" }}
+                </p>
+            </div>
+        </div>
+        <div class="completion-widget" style="background: rgba(0,0,0,0.1); border: none; color: white;">
+            <div class="completion-header">
+                <span style="font-weight: 700;">Profile Completion</span>
+                <span style="font-weight: 800;">85%</span>
+            </div>
+            <div class="completion-bar" style="background: rgba(255,255,255,0.2); height: 8px;">
+                <div class="completion-fill" style="background: white; width: 85%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-standard-grid">
+        <aside class="profile-sidebar-wrapper">
+            <div class="profile-nav-card">
+                <span class="nav-section-label">Account Menu</span>
+                <nav>
+                    <a href="{% url 'profile' %}" class="premium-nav-item active">
+                        <i class="fas fa-fingerprint"></i> Personal Profile
+                    </a>
+                    <a href="{% url 'settings' %}" class="premium-nav-item">
+                        <i class="fas fa-shield-halved"></i> Security Hub
+                    </a>
+                    <a href="{% url 'history' %}#orders" class="premium-nav-item">
+                        <i class="fas fa-bag-shopping"></i> My Orders
+                    </a>
+                    <a href="{% url 'history' %}#reports" class="premium-nav-item">
+                        <i class="fas fa-file-waveform"></i> Health Reports
+                    </a>
+                    <a href="{% url 'logout' %}" class="premium-nav-item logout">
+                        <i class="fas fa-power-off"></i> Secure Logout
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="profile-form-container">
+            <form method="POST">
+                {% csrf_token %}
+
+                <!-- Section 1: Identity -->
+                <div class="glass-card">
+                    <h3 class="section-title-premium">
+                        <span><i class="fas fa-passport"></i></span>
+                        Personal Identity
+                    </h3>
+                    <div class="premium-grid">
+                        <div class="input-wrapper">
+                            <label><i class="fas fa-id-badge"></i> First Name</label>
+                            <input type="text" name="first_name" class="modern-input" value="{{ user.first_name }}"
+                                placeholder="First Name">
+                        </div>
+                        <div class="input-wrapper">
+                            <label><i class="fas fa-id-badge"></i> Last Name</label>
+                            <input type="text" name="last_name" class="modern-input" value="{{ user.last_name }}"
+                                placeholder="Last Name">
+                        </div>
+                        <div class="input-wrapper" style="grid-column: span 2;">
+                            <label><i class="fas fa-envelope-open-text"></i> Primary Email</label>
+                            <input type="email" name="email" class="modern-input" value="{{ user.email }}"
+                                placeholder="Example: user@veda.care">
+                        </div>
+                        <div class="input-wrapper">
+                            <label><i class="fas fa-hourglass-half"></i> Current Age</label>
+                            <input type="number" name="age" class="modern-input" value="{{ profile.age }}"
+                                placeholder="Your Age">
+                        </div>
+                        <div class="input-wrapper">
+                            <label><i class="fas fa-venus-mars"></i> Gender Orientation</label>
+                            <select name="gender" class="modern-input" style="appearance: none;">
+                                <option value="" {% if not profile.gender %}selected{% endif %}>Select</option>
+                                <option value="M" {% if profile.gender == "M" %}selected{% endif %}>Male</option>
+                                <option value="F" {% if profile.gender == "F" %}selected{% endif %}>Female</option>
+                                <option value="O" {% if profile.gender == "O" %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Clinical Profile -->
+                <div class="glass-card" style="margin-top: 2rem;">
+                    <h3 class="section-title-premium">
+                        <span><i class="fas fa-hand-holding-medical"></i></span>
+                        Clinical Profile
+                    </h3>
+                    <div class="premium-grid">
+                        <div class="input-wrapper" style="grid-column: span 2;">
+                            <label><i class="fas fa-notes-medical"></i> Medical History Brief</label>
+                            <textarea name="medical_history" class="modern-input modern-textarea"
+                                placeholder="Detail any significant medical events...">{{ profile.medical_history }}</textarea>
+                        </div>
+                        <div class="input-wrapper" style="grid-column: span 2;">
+                            <label><i class="fas fa-vial"></i> Known Allergies</label>
+                            <textarea name="allergies" class="modern-input modern-textarea" style="min-height: 80px;"
+                                placeholder="List any respiratory, skin, or food allergies...">{{ profile.allergies }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" class="ultimate-save-btn">
+                        <i class="fas fa-check-double"></i> Save Updates
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+</div>
+{% endblock %}

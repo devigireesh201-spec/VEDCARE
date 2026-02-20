@@ -1,0 +1,728 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Checkout - VedaCare{% endblock %}
+
+{% block content %}
+<style>
+    .checkout-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 2rem;
+    }
+
+    .checkout-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 2px solid var(--gray-100);
+        padding-bottom: 0.75rem;
+    }
+
+    /* Order Summary Items */
+    .summary-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--gray-50);
+    }
+
+    .summary-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+    }
+
+    .summary-details {
+        flex: 1;
+    }
+
+    .summary-name {
+        font-weight: 600;
+        color: var(--gray-900);
+    }
+
+    .summary-price {
+        color: var(--primary-600);
+        font-weight: 700;
+    }
+
+    /* Payment Options */
+    .payment-options {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .payment-method {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .payment-method:hover {
+        border-color: var(--primary-300);
+        background: var(--primary-50);
+    }
+
+    .payment-method.active {
+        border-color: var(--primary-500);
+        background: var(--primary-50);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+
+    .payment-method i {
+        font-size: 1.5rem;
+        color: var(--primary-600);
+        width: 30px;
+        text-align: center;
+    }
+
+    .method-info {
+        flex: 1;
+    }
+
+    .method-name {
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 0.25rem;
+    }
+
+    .method-desc {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+    }
+
+    /* Price Sidebar */
+    .sidebar-card {
+        position: sticky;
+        top: 100px;
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        height: fit-content;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        color: var(--gray-600);
+    }
+
+    .price-total {
+        border-top: 2px solid var(--gray-100);
+        padding-top: 1rem;
+        margin-top: 1rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .pay-btn {
+        width: 100%;
+        margin-top: 1.5rem;
+        padding: 1rem;
+        font-size: 1.125rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    /* QR Code Styling */
+    .qr-container {
+        margin-top: 2rem;
+        padding: 2rem;
+        border: 2px dashed var(--primary-200);
+        border-radius: var(--radius-xl);
+        background: var(--primary-50);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        transition: all 0.3s ease;
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    .qr-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        text-align: center;
+        max-width: 280px;
+        margin: 0 auto;
+    }
+
+    .qr-title {
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+        font-size: 1rem;
+    }
+
+    .qr-image-wrapper {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        margin: 0 auto 1.5rem;
+        overflow: hidden;
+        border-radius: var(--radius-md);
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--gray-100);
+    }
+
+    .qr-image {
+        width: 180px;
+        height: 180px;
+        object-fit: contain;
+    }
+
+    .qr-scanner-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--primary-500);
+        box-shadow: 0 0 15px var(--primary-500);
+        animation: qr-scan 3s ease-in-out infinite;
+        opacity: 0.7;
+    }
+
+    @keyframes qr-scan {
+
+        0%,
+        100% {
+            top: 5%;
+        }
+
+        50% {
+            top: 95%;
+        }
+    }
+
+    .qr-info {
+        margin-bottom: 1rem;
+    }
+
+    .merchant-name {
+        font-weight: 600;
+        color: var(--gray-800);
+        font-size: 0.9rem;
+    }
+
+    .upi-id {
+        font-size: 0.8rem;
+        color: var(--gray-500);
+        font-family: monospace;
+    }
+
+    .qr-badges {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--gray-400);
+        border-top: 1px solid var(--gray-100);
+        padding-top: 1rem;
+    }
+
+    /* Net Banking & Bank Grid Styling */
+    .net-banking-container {
+        margin-top: 2rem;
+        padding: 2rem;
+        border: 2px solid var(--primary-100);
+        border-radius: var(--radius-xl);
+        background: white;
+        display: none;
+        flex-direction: column;
+        gap: 1.5rem;
+        animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .bank-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 1rem;
+    }
+
+    .bank-card {
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+    }
+
+    .bank-card:hover {
+        border-color: var(--primary-400);
+        background: var(--primary-50);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .bank-card.active {
+        border-color: var(--primary-500);
+        background: var(--primary-50);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+
+    .bank-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--gray-50);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: var(--gray-700);
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+    }
+
+    .bank-card.active .bank-icon-wrapper {
+        background: var(--primary-500);
+        color: white;
+    }
+
+    .bank-name {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--gray-900);
+    }
+
+    .bank-status {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+        background: var(--success-light);
+        color: var(--success);
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .bank-status.low {
+        background: var(--warning-light);
+        color: var(--warning);
+    }
+
+    .other-banks-wrapper {
+        margin-top: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--gray-100);
+    }
+
+    .bank-select-control {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--gray-700);
+        cursor: pointer;
+        background-color: white;
+        transition: border-color 0.3s;
+    }
+
+    .bank-select-control:focus {
+        border-color: var(--primary-500);
+        outline: none;
+    }
+
+    /* Redirection Overlay */
+    .redirect-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.98);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .redirect-loader {
+        width: 80px;
+        height: 80px;
+        border: 5px solid var(--gray-100);
+        border-top: 5px solid var(--primary-500);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar-card {
+            position: static;
+        }
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="checkout-grid">
+        <div class="main-content">
+            <!-- Delivery Info -->
+            <div class="checkout-card animate-fadeIn">
+                <h2 class="section-title">
+                    <i class="fas fa-map-marker-alt"></i> Delivery Information
+                </h2>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-input" value="{{ user.get_full_name|default:user.username }}"
+                            placeholder="Your Name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" class="form-input" placeholder="+91 XXX XXX XXXX">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Full Address</label>
+                    <textarea class="form-textarea" placeholder="Street, Apartment, City, State, PIN Code"></textarea>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="checkout-card animate-fadeIn" style="animation-delay: 0.1s;">
+                <h2 class="section-title">
+                    <i class="fas fa-credit-card"></i> Payment Options
+                </h2>
+                <div class="payment-options">
+                    <div class="payment-method active" onclick="selectPayment(this, 'upi')">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div class="method-info">
+                            <div class="method-name">UPI Payment</div>
+                            <div class="method-desc">Google Pay, PhonePe, Paytm</div>
+                        </div>
+                        <i class="fas fa-check-circle check-icon"></i>
+                    </div>
+
+                    <div class="payment-method" onclick="selectPayment(this, 'netbanking')">
+                        <i class="fas fa-university"></i>
+                        <div class="method-info">
+                            <div class="method-name">Net Banking</div>
+                            <div class="method-desc">All major Indian banks supported</div>
+                        </div>
+                        <i class="fas fa-check-circle check-icon" style="display:none"></i>
+                    </div>
+
+                    <div class="payment-method" onclick="selectPayment(this, 'cod')">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <div class="method-info">
+                            <div class="method-name">Cash on Delivery</div>
+                            <div class="method-desc">Pay when your seeds/plants arrive</div>
+                        </div>
+                        <i class="fas fa-check-circle check-icon" style="display:none"></i>
+                    </div>
+                </div>
+
+                <!-- Net Banking Section -->
+                <div id="netbanking-section" class="net-banking-container">
+                    <h3
+                        style="font-size: 1.1rem; color: var(--gray-800); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-university"></i> Choose your Bank
+                    </h3>
+                    <div class="bank-grid">
+                        <div class="bank-card" id="bank-sbi" onclick="selectBank(this, 'SBI')">
+                            <div class="bank-icon-wrapper">SBI</div>
+                            <span class="bank-name">SBI</span>
+                            <span class="bank-status"><i class="fas fa-bolt"></i> Fast</span>
+                        </div>
+                        <div class="bank-card" id="bank-hdfc" onclick="selectBank(this, 'HDFC')">
+                            <div class="bank-icon-wrapper">HDFC</div>
+                            <span class="bank-name">HDFC</span>
+                            <span class="bank-status"><i class="fas fa-bolt"></i> Fast</span>
+                        </div>
+                        <div class="bank-card" id="bank-icici" onclick="selectBank(this, 'ICICI')">
+                            <div class="bank-icon-wrapper">ICICI</div>
+                            <span class="bank-name">ICICI</span>
+                            <span class="bank-status"><i class="fas fa-bolt"></i> Fast</span>
+                        </div>
+                        <div class="bank-card" id="bank-axis" onclick="selectBank(this, 'AXIS')">
+                            <div class="bank-icon-wrapper">AXIS</div>
+                            <span class="bank-name">Axis</span>
+                            <span class="bank-status low"><i class="fas fa-clock"></i> Slow</span>
+                        </div>
+                    </div>
+
+                    <div class="other-banks-wrapper">
+                        <p style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 0.75rem;">Or search other
+                            banks</p>
+                        <select class="bank-select-control" id="other-banks-dropdown"
+                            onchange="selectBank(null, this.value)">
+                            <option value="">-- Choose From 50+ Banks --</option>
+                            <option value="PNB">Punjab National Bank</option>
+                            <option value="BOB">Bank of Baroda</option>
+                            <option value="CANARA">Canara Bank</option>
+                            <option value="IDBI">IDBI Bank</option>
+                            <option value="YES">Yes Bank</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- UPI QR Code Section -->
+                <div id="upi-qr-section" class="qr-container">
+                    <div class="qr-card">
+                        <p class="qr-title">Scan QR to Pay</p>
+                        <div class="qr-image-wrapper">
+                            <img src="{% static 'images/upi_qr.png' %}" alt="UPI QR Code" class="qr-image">
+                            <div class="qr-scanner-line"></div>
+                        </div>
+                        <div class="qr-info">
+                            <div class="merchant-name">VedaCare Health & Wellness</div>
+                            <div class="upi-id">vedacare@upi</div>
+                        </div>
+                        <div class="qr-badges">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo.png" alt="UPI"
+                                height="15">
+                            <span>Secured by VedaPay</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="redirect-modal" class="redirect-overlay">
+                <div class="redirect-loader"></div>
+                <h2 style="color: var(--gray-900); margin-bottom: 0.5rem;">Redirecting to Secure Bank Portal</h2>
+                <p style="color: var(--gray-500);">Please do not refresh or close this window...</p>
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; align-items: center;">
+                    <i class="fas fa-shield-alt" style="color: var(--primary-600);"></i>
+                    <span style="font-size: 0.875rem; color: var(--gray-400);">SSL Secured 256-bit Encryption</span>
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="checkout-card animate-fadeIn" style="animation-delay: 0.2s;">
+                <h2 class="section-title">
+                    <i class="fas fa-shopping-bag"></i> Order Summary
+                </h2>
+                <div id="checkout-items">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Summary -->
+        <div class="sidebar-wrapper">
+            <div class="sidebar-card animate-fadeIn" style="animation-delay: 0.3s;">
+                <h2 style="font-size: 1.25rem; margin-bottom:1.5rem;">Price Details</h2>
+                <div class="price-row">
+                    <span>Price (<span id="summary-count">0</span> items)</span>
+                    <span>₹<span id="summary-subtotal">0</span></span>
+                </div>
+                <div class="price-row">
+                    <span>Delivery Charges</span>
+                    <span style="color: var(--success);">FREE</span>
+                </div>
+                <div class="price-row">
+                    <span>Packaging Fee</span>
+                    <span>₹20</span>
+                </div>
+
+                <div class="price-total">
+                    <span>Total Amount</span>
+                    <span style="color: var(--primary-600);">₹<span id="summary-total">0</span></span>
+                </div>
+
+                <button class="btn btn-primary pay-btn" onclick="processOrder()">
+                    <i class="fas fa-lock"></i> Confirm & Pay
+                </button>
+                <p style="text-align:center; font-size: 0.75rem; color: var(--gray-500); margin-top: 1rem;">
+                    Your data is protected with end-to-end encryption.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const checkoutItems = document.getElementById('checkout-items');
+    const summaryCount = document.getElementById('summary-count');
+    const summarySubtotal = document.getElementById('summary-subtotal');
+    const summaryTotal = document.getElementById('summary-total');
+
+    let cart = JSON.parse(localStorage.getItem('vedacareCart')) || [];
+
+    function loadSummary() {
+        if (cart.length === 0) {
+            window.location.href = "{% url 'ekart' %}";
+            return;
+        }
+
+        checkoutItems.innerHTML = cart.map(item => `
+            <div class="summary-item">
+                <img src="${item.image}" alt="${item.name}" class="summary-img">
+                <div class="summary-details">
+                    <div class="summary-name">${item.name}</div>
+                    <div class="summary-desc" style="font-size:0.875rem; color:var(--gray-500)">Quantity: ${item.quantity}</div>
+                </div>
+                <div class="summary-price">₹${(item.price * item.quantity).toFixed(2)}</div>
+            </div>
+        `).join('');
+
+        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        summaryCount.textContent = count;
+        summarySubtotal.textContent = subtotal.toFixed(2);
+        summaryTotal.textContent = (subtotal + 20).toFixed(2);
+    }
+
+    let selectedMethod = 'upi';
+    let selectedBankCode = '';
+
+    function selectPayment(element, method) {
+        document.querySelectorAll('.payment-method').forEach(m => {
+            m.classList.remove('active');
+            m.querySelector('.check-icon').style.display = 'none';
+        });
+        element.classList.add('active');
+        element.querySelector('.check-icon').style.display = 'block';
+
+        selectedMethod = method;
+
+        const upiSection = document.getElementById('upi-qr-section');
+        const nbSection = document.getElementById('netbanking-section');
+
+        // Reset everything
+        upiSection.style.display = 'none';
+        nbSection.style.display = 'none';
+
+        if (method === 'upi') {
+            upiSection.style.display = 'flex';
+            upiSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else if (method === 'netbanking') {
+            nbSection.style.display = 'flex';
+            nbSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    function selectBank(element, bankCode) {
+        if (element) {
+            document.querySelectorAll('.bank-card').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('other-banks-dropdown').value = ""; // Reset dropdown
+        } else {
+            document.querySelectorAll('.bank-card').forEach(c => c.classList.remove('active'));
+        }
+        selectedBankCode = bankCode;
+    }
+
+
+    async function processOrder() {
+        if (selectedMethod === 'netbanking' && !selectedBankCode) {
+            alert("Please select a bank to proceed with Net Banking.");
+            return;
+        }
+
+        const payBtn = document.querySelector('.pay-btn');
+        const originalText = payBtn.innerHTML;
+
+        // Show redirection modal for Net Banking
+        if (selectedMethod === 'netbanking') {
+            document.getElementById('redirect-modal').style.display = 'flex';
+            await new Promise(r => setTimeout(r, 2000)); // Simulate bank redirect delay
+        }
+
+        payBtn.disabled = true;
+        payBtn.innerHTML = '<div class="spinner" style="width:20px; height:20px; border-width:2px; border-top-color:white;"></div> Processing...';
+
+        const total = parseFloat(summaryTotal.textContent);
+
+        try {
+            const response = await fetch("{% url 'checkout' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    cart: cart,
+                    total: total,
+                    payment_method: selectedMethod,
+                    bank_code: selectedBankCode
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                localStorage.removeItem('vedacareCart');
+                window.location.href = "{% url 'payment_success' %}?order_id=" + result.order_id;
+            } else {
+                alert("Error processing order: " + result.message);
+                payBtn.disabled = false;
+                payBtn.innerHTML = originalText;
+                document.getElementById('redirect-modal').style.display = 'none';
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Something went wrong!");
+            payBtn.disabled = false;
+            payBtn.innerHTML = originalText;
+            document.getElementById('redirect-modal').style.display = 'none';
+        }
+    }
+
+    loadSummary();
+</script>
+{% endblock %}
