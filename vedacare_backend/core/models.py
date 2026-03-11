@@ -8,6 +8,7 @@ class UserProfile(models.Model):
     gender = models.CharField(max_length=10, choices=[('M', 'Male'), ('F', 'Female'), ('O', 'Other')], null=True, blank=True)
     medical_history = models.TextField(blank=True)
     allergies = models.TextField(blank=True)
+    medical_report = models.FileField(upload_to='medical_reports/', null=True, blank=True)
 
 # MODULE 2: Disease & Symptom Management
 class AyurvedicCondition(models.Model):
@@ -24,7 +25,7 @@ class AyurvedicCondition(models.Model):
 class AyurvedicPlant(models.Model):
     name = models.CharField(max_length=100)
     scientific_name = models.CharField(max_length=150)
-    image = models.ImageField(upload_to='plants/')
+    image = models.ImageField(upload_to='plants/', null=True, blank=True)
     medicinal_use = models.TextField()
     properties = models.TextField() # e.g. Rasa, Guna, Virya
     habitat = models.TextField()

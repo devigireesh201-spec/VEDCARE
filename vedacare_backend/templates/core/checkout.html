@@ -600,7 +600,7 @@
     const summarySubtotal = document.getElementById('summary-subtotal');
     const summaryTotal = document.getElementById('summary-total');
 
-    let cart = JSON.parse(localStorage.getItem('vedacareCart')) || [];
+    let cart = JSON.parse(localStorage.getItem('vedacare_cart')) || [];
 
     function loadSummary() {
         if (cart.length === 0) {
@@ -610,17 +610,17 @@
 
         checkoutItems.innerHTML = cart.map(item => `
             <div class="summary-item">
-                <img src="${item.image}" alt="${item.name}" class="summary-img">
+                <img src="${item.img}" alt="${item.name}" class="summary-img">
                 <div class="summary-details">
                     <div class="summary-name">${item.name}</div>
-                    <div class="summary-desc" style="font-size:0.875rem; color:var(--gray-500)">Quantity: ${item.quantity}</div>
+                    <div class="summary-desc" style="font-size:0.875rem; color:var(--gray-500)">Quantity: ${item.qty}</div>
                 </div>
-                <div class="summary-price">₹${(item.price * item.quantity).toFixed(2)}</div>
+                <div class="summary-price">₹${(item.price * item.qty).toFixed(2)}</div>
             </div>
         `).join('');
 
-        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const count = cart.reduce((sum, item) => sum + item.qty, 0);
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
         summaryCount.textContent = count;
         summarySubtotal.textContent = subtotal.toFixed(2);
@@ -706,7 +706,7 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                localStorage.removeItem('vedacareCart');
+                localStorage.removeItem('vedacare_cart');
                 window.location.href = "{% url 'payment_success' %}?order_id=" + result.order_id;
             } else {
                 alert("Error processing order: " + result.message);
@@ -724,5 +724,11 @@
     }
 
     loadSummary();
+    
+    // Initialize default payment view (UPI)
+    const upiMethod = document.querySelector('.payment-method.active');
+    if (upiMethod) {
+        selectPayment(upiMethod, 'upi');
+    }
 </script>
 {% endblock %}

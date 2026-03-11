@@ -1,687 +1,590 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
 {% block title %}Herbal E-Kart - VedaCare{% endblock %}
 
 {% block content %}
 <style>
-    .ekart-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 3rem 2rem;
+    :root {
+        --accent-orange: #f59e0b;
+        --card-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
     }
 
-    .ekart-header {
+    .ekart-wrapper {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 1rem 0 4rem 0;
+    }
+
+    /* Professional Top Bar */
+    .ekart-top {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 3rem;
+        align-items: flex-end;
+        margin-bottom: 3.5rem;
         flex-wrap: wrap;
-        gap: 1.5rem;
-        animation: fadeIn 0.6s ease-out;
+        gap: 2rem;
     }
 
-    .header-left h1 {
-        font-size: 2.5rem;
-        color: var(--gray-900);
-        margin-bottom: 0.5rem;
+    .top-info h1 {
+        font-size: 3rem;
+        color: #1a202c;
         font-family: var(--font-display);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
+        margin-bottom: 0.5rem;
     }
 
-    .header-left p {
-        color: var(--gray-600);
-        font-size: 1.125rem;
+    .top-info p {
+        color: #64748b;
+        font-size: 1.1rem;
     }
 
-    .cart-widget {
-        position: relative;
-        background: var(--gradient-primary);
+    .cart-pill {
+        background: var(--primary);
         color: white;
-        padding: 1rem 2rem;
-        border-radius: var(--radius-full);
+        padding: 1rem 1.8rem;
+        border-radius: 50px;
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 12px;
         cursor: pointer;
-        box-shadow: var(--shadow-lg);
-        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(46, 125, 50, 0.2);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        border: none;
     }
 
-    .cart-widget:hover {
-        box-shadow: var(--shadow-xl), var(--shadow-glow);
-        transform: translateY(-2px);
+    .cart-pill:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(46, 125, 50, 0.3);
+        background: var(--primary-dark);
     }
 
-    .cart-icon {
-        font-size: 1.5rem;
+    .pill-icon {
         position: relative;
+        font-size: 1.3rem;
     }
 
-    .cart-badge {
+    .pill-badge {
         position: absolute;
         top: -8px;
-        right: -8px;
-        background: white;
-        color: var(--primary-600);
-        width: 22px;
-        height: 22px;
+        right: -10px;
+        background: #ef4444;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 800;
+        width: 18px;
+        height: 18px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.75rem;
-        font-weight: 700;
+        border: 2px solid var(--primary);
     }
 
-    .cart-text {
+    .pill-data {
+        text-align: left;
+    }
+
+    .pill-data span {
+        display: block;
+        font-size: 0.8rem;
+        opacity: 0.8;
         font-weight: 600;
     }
 
-    /* Filters */
-    .filters-section {
-        background: white;
-        padding: 1.5rem;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-md);
-        margin-bottom: 2rem;
-        display: flex;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-        align-items: center;
+    .pill-data strong {
+        font-size: 1rem;
+        font-weight: 800;
     }
 
-    .filter-group {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .filter-label {
-        font-weight: 600;
-        color: var(--gray-700);
-        font-size: 0.95rem;
-    }
-
-    .filter-select {
-        padding: 0.5rem 1rem;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-md);
-        font-family: var(--font-primary);
-        color: var(--gray-700);
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .filter-select:focus {
-        outline: none;
-        border-color: var(--primary-500);
-    }
-
-    .search-box {
-        flex: 1;
-        min-width: 250px;
-    }
-
-    .search-input {
-        width: 100%;
-        padding: 0.75rem 1rem 0.75rem 2.5rem;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-full);
-        font-family: var(--font-primary);
-        transition: all 0.3s ease;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%239ca3af" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>') no-repeat 0.75rem center;
-        background-size: 1.25rem;
-    }
-
-    .search-input:focus {
-        outline: none;
-        border-color: var(--primary-500);
-        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
-    }
-
-    /* Products Grid */
-    .products-grid {
+    /* Filters Section */
+    .shop-controls {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 2rem;
+        grid-template-columns: 1fr auto;
+        gap: 1.5rem;
         margin-bottom: 3rem;
+        align-items: center;
+    }
+
+    .search-wrap {
+        position: relative;
+    }
+
+    .search-wrap i {
+        position: absolute;
+        left: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+
+    .shop-search {
+        width: 100%;
+        padding: 1rem 1.5rem 1rem 3rem;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .shop-search:focus {
+        outline: none;
+        border-color: var(--primary-400);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .shop-sort {
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+    }
+
+    /* Product Cards */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2.5rem;
     }
 
     .product-card {
         background: white;
-        border-radius: var(--radius-xl);
+        border-radius: 24px;
         overflow: hidden;
-        box-shadow: var(--shadow-md);
-        transition: all 0.4s ease;
-        border: 2px solid transparent;
-        animation: scaleIn 0.4s ease-out;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
     }
 
     .product-card:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow-2xl);
-        border-color: var(--primary-200);
+        transform: translateY(-10px);
+        box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.12);
     }
 
-    .product-image {
+    .prod-img-box {
         width: 100%;
-        height: 220px;
+        height: 240px;
+        background: #f1f5f9;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .prod-img {
+        width: 100%;
+        height: 100%;
         object-fit: cover;
-        background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+        transition: transform 0.6s ease;
     }
 
-    .product-body {
-        padding: 1.5rem;
+    .product-card:hover .prod-img {
+        transform: scale(1.1);
     }
 
-    .product-name {
+    .prod-content {
+        padding: 1.8rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .prod-category {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--primary-600);
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+    }
+
+    .prod-title {
         font-size: 1.25rem;
         font-weight: 700;
-        color: var(--gray-900);
-        margin-bottom: 0.5rem;
-    }
-
-    .product-scientific {
-        font-size: 0.875rem;
-        color: var(--gray-500);
-        font-style: italic;
-        margin-bottom: 0.75rem;
-    }
-
-    .product-description {
-        font-size: 0.875rem;
-        color: var(--gray-600);
-        line-height: 1.6;
-        margin-bottom: 1rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .product-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 1rem;
-        border-top: 1px solid var(--gray-100);
-    }
-
-    .product-price {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--primary-600);
-    }
-
-    .add-to-cart-btn {
-        padding: 0.625rem 1.25rem;
-        background: var(--gradient-primary);
-        color: white;
-        border: none;
-        border-radius: var(--radius-lg);
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .add-to-cart-btn:hover {
-        box-shadow: var(--shadow-md);
-        transform: translateY(-2px);
-    }
-
-    .add-to-cart-btn.added {
-        background: var(--success);
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: white;
-        border-radius: var(--radius-2xl);
-        box-shadow: var(--shadow-md);
-    }
-
-    .empty-state i {
-        font-size: 4rem;
-        color: var(--gray-300);
-        margin-bottom: 1rem;
-    }
-
-    .empty-state h3 {
-        color: var(--gray-700);
-        margin-bottom: 0.5rem;
-    }
-
-    .empty-state p {
-        color: var(--gray-500);
-    }
-
-    /* Cart Modal */
-    .cart-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.6);
-        z-index: 2000;
-        animation: fadeIn 0.3s ease-out;
-    }
-
-    .cart-modal.active {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1rem;
-    }
-
-    .cart-content {
-        background: white;
-        border-radius: var(--radius-2xl);
-        max-width: 600px;
-        width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: var(--shadow-2xl);
-        animation: scaleIn 0.3s ease-out;
-    }
-
-    .cart-header {
-        padding: 1.5rem;
-        border-bottom: 2px solid var(--gray-100);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
-        background: white;
-        z-index: 10;
-    }
-
-    .cart-header h2 {
-        margin: 0;
-        color: var(--gray-900);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .close-cart {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        color: var(--gray-500);
-        cursor: pointer;
-        transition: color 0.3s ease;
-    }
-
-    .close-cart:hover {
-        color: var(--gray-900);
-    }
-
-    .cart-items {
-        padding: 1.5rem;
-    }
-
-    .cart-item {
-        display: flex;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--gray-50);
-        border-radius: var(--radius-lg);
-        margin-bottom: 1rem;
-    }
-
-    .cart-item-image {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: var(--radius-md);
-    }
-
-    .cart-item-details {
-        flex: 1;
-    }
-
-    .cart-item-name {
-        font-weight: 600;
-        color: var(--gray-900);
+        color: #1e293b;
         margin-bottom: 0.25rem;
     }
 
-    .cart-item-price {
-        color: var(--primary-600);
-        font-weight: 700;
+    .prod-sci {
+        font-style: italic;
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-bottom: 1.2rem;
+        display: block;
     }
 
-    .cart-item-remove {
-        background: none;
-        border: none;
-        color: var(--error);
-        cursor: pointer;
-        padding: 0.5rem;
-        transition: transform 0.3s ease;
-    }
-
-    .cart-item-remove:hover {
-        transform: scale(1.2);
-    }
-
-    .cart-footer {
-        padding: 1.5rem;
-        border-top: 2px solid var(--gray-100);
-        background: var(--gray-50);
-        position: sticky;
-        bottom: 0;
-    }
-
-    .cart-total {
+    .prod-price-row {
+        margin-top: auto;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
-        font-size: 1.25rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .price-tag {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #1a202c;
+    }
+
+    .add-btn {
+        background: #f1f5f9;
+        color: #475569;
+        border: none;
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .add-btn:hover {
+        background: var(--primary);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .add-btn.success {
+        background: #22c55e;
+        color: white;
+    }
+
+    /* Cart Drawer/Modal */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        display: none;
+    }
+
+    .modal-overlay.active {
+        display: block;
+    }
+
+    .cart-drawer {
+        position: fixed;
+        top: 0;
+        right: -450px;
+        width: 100%;
+        max-width: 450px;
+        height: 100%;
+        background: white;
+        z-index: 2001;
+        box-shadow: -20px 0 60px rgba(0, 0, 0, 0.1);
+        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cart-drawer.active {
+        right: 0;
+    }
+
+    .drawer-header {
+        padding: 2rem;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .drawer-body {
+        flex-grow: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+
+    .drawer-footer {
+        padding: 2rem;
+        background: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .cart-item-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 1.5rem;
+    }
+
+    .item-thumbnail {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        object-fit: cover;
+    }
+
+    .item-details {
+        flex-grow: 1;
+    }
+
+    .item-name {
         font-weight: 700;
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+
+    .item-price {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    .remove-trigger {
+        color: #ef4444;
+        cursor: pointer;
+        font-size: 0.85rem;
     }
 
     .checkout-btn {
         width: 100%;
-        padding: 1rem;
-        background: var(--gradient-primary);
+        padding: 1.2rem;
+        background: var(--primary);
         color: white;
         border: none;
-        border-radius: var(--radius-lg);
-        font-size: 1.125rem;
-        font-weight: 600;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1.1rem;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: var(--shadow-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        transition: all 0.3s;
     }
 
     .checkout-btn:hover {
-        box-shadow: var(--shadow-xl);
+        background: var(--primary-dark);
         transform: translateY(-2px);
     }
 
     @media (max-width: 768px) {
-        .ekart-container {
-            padding: 2rem 1rem;
-        }
-
-        .ekart-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .header-left h1 {
-            font-size: 2rem;
-        }
-
-        .filters-section {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .filter-group {
-            width: 100%;
-        }
-
-        .filter-select {
-            flex: 1;
-        }
-
-        .products-grid {
+        .shop-controls {
             grid-template-columns: 1fr;
+        }
+
+        .top-info h1 {
+            font-size: 2.2rem;
         }
     }
 </style>
 
-<div class="ekart-container">
-    <div class="ekart-header">
-        <div class="header-left">
-            <h1>
-                <i class="fas fa-store"></i>
-                Herbal E-Kart
-            </h1>
-            <p>Authentic Ayurvedic plants and remedies delivered to your doorstep</p>
+<div class="ekart-wrapper">
+    <!-- Header -->
+    <div class="ekart-top">
+        <div class="top-info">
+            <h1>Herbal Marketplace</h1>
+            <p>Direct from nature to your door. Premium Ayurvedic plants verified by AI.</p>
         </div>
-        <div class="cart-widget" onclick="toggleCart()">
-            <div class="cart-icon">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-badge" id="cart-count">0</span>
+        <button class="cart-pill" onclick="toggleCart()">
+            <div class="pill-icon">
+                <i class="fas fa-shopping-basket"></i>
+                <span class="pill-badge" id="cart-count">0</span>
             </div>
-            <div class="cart-text">
-                <div>My Cart</div>
-                <div style="font-size: 0.875rem; opacity: 0.9;">₹<span id="cart-total">0</span></div>
+            <div class="pill-data">
+                <span>Total Balance</span>
+                <strong>₹<span id="cart-total">0</span></strong>
             </div>
-        </div>
+        </button>
     </div>
 
-    <div class="filters-section">
-        <div class="search-box">
-            <input type="text" class="search-input" id="search-input" placeholder="Search for plants...">
+    <!-- Controls -->
+    <div class="shop-controls">
+        <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="shop-search" class="shop-search" placeholder="Search for botanicals...">
         </div>
-        <div class="filter-group">
-            <label class="filter-label">Sort by:</label>
-            <select class="filter-select" id="sort-select">
-                <option value="name">Name (A-Z)</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-            </select>
-        </div>
+        <select id="shop-sort" class="shop-sort">
+            <option value="name">Name (A-Z)</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+        </select>
     </div>
 
-    <div class="products-grid" id="products-grid">
+    <!-- Grid -->
+    <div class="product-grid" id="product-grid">
         {% for product in products %}
         <div class="product-card" data-name="{{ product.name|lower }}" data-price="{{ product.price }}">
-            {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
-            {% else %}
-            <div class="product-image"
-                style="display: flex; align-items: center; justify-content: center; font-size: 3rem;">🌿</div>
-            {% endif %}
-            <div class="product-body">
-                <h3 class="product-name">{{ product.name }}</h3>
-                <p class="product-scientific">{{ product.scientific_name }}</p>
-                <p class="product-description">{{ product.medicinal_use|truncatewords:12 }}</p>
-                <div class="product-footer">
-                    <div class="product-price">₹{{ product.price }}</div>
-                    <button class="add-to-cart-btn" data-id="{{ product.id }}" data-name="{{ product.name }}"
+            <div class="prod-img-box">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="prod-img">
+                {% else %}
+                <div
+                    style="height:100%; display:flex; align-items:center; justify-content:center; font-size:4rem; background:#f1f5f9; color:#cbd5e1;">
+                    🌿</div>
+                {% endif %}
+            </div>
+            <div class="prod-content">
+                <span class="prod-category">Verified Ayurvedic</span>
+                <h3 class="prod-title">{{ product.name }}</h3>
+                <span class="prod-sci">{{ product.scientific_name }}</span>
+                <p style="color:#64748b; font-size:0.9rem; line-height:1.5; margin-bottom:1.5rem;">{{ product.name }}
+                    TEST</p>
+
+                <div class="prod-price-row">
+                    <span class="price-tag">₹{{ product.price }}</span>
+                    <button class="add-btn" data-id="{{ product.id }}" data-name="{{ product.name }}"
                         data-price="{{ product.price }}"
-                        data-image="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/80{% endif %}"
+                        data-img="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/80{% endif %}"
                         onclick="addToCart(this)">
-                        <i class="fas fa-cart-plus"></i>
-                        Add
+                        <i class="fas fa-plus"></i>
                     </button>
                 </div>
             </div>
         </div>
         {% empty %}
-        <div class="empty-state" style="grid-column: 1 / -1;">
-            <i class="fas fa-seedling"></i>
-            <h3>No Products Available</h3>
-            <p>Check back later for amazing herbal products!</p>
+        <div
+            style="grid-column:1/-1; text-align:center; padding:6rem; background:white; border-radius:32px; box-shadow:var(--card-shadow);">
+            <i class="fas fa-box-open" style="font-size:4rem; color:#e2e8f0; margin-bottom:1.5rem;"></i>
+            <h3>Inventory Refreshing</h3>
+            <p style="color:#94a3b8;">Our organic farms are currently restocking. Please check back shortly.</p>
         </div>
         {% endfor %}
     </div>
 </div>
 
-<!-- Cart Modal -->
-<div class="cart-modal" id="cart-modal">
-    <div class="cart-content">
-        <div class="cart-header">
-            <h2>
-                <i class="fas fa-shopping-bag"></i>
-                Shopping Cart
-            </h2>
-            <button class="close-cart" onclick="toggleCart()">
-                <i class="fas fa-times"></i>
-            </button>
+<!-- Cart Drawer System -->
+<div class="modal-overlay" id="modal-overlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cart-drawer">
+    <div class="drawer-header">
+        <h3 style="font-family:var(--font-display); font-size:1.5rem; margin:0;"><i class="fas fa-shopping-bag"></i>
+            Your Basket</h3>
+        <i class="fas fa-times" style="cursor:pointer; font-size:1.2rem; color:#94a3b8;" onclick="toggleCart()"></i>
+    </div>
+    <div class="drawer-body" id="cart-items">
+        <!-- Rendered by JS -->
+    </div>
+    <div class="drawer-footer" id="drawer-footer" style="display:none;">
+        <div
+            style="display:flex; justify-content:space-between; margin-bottom:1.5rem; font-weight:800; font-size:1.2rem;">
+            <span>Grand Total</span>
+            <span style="color:var(--primary);">₹<span id="modal-total">0</span></span>
         </div>
-        <div class="cart-items" id="cart-items">
-            <div class="empty-state">
-                <i class="fas fa-shopping-cart"></i>
-                <h3>Your cart is empty</h3>
-                <p>Add some herbal products to get started!</p>
-            </div>
-        </div>
-        <div class="cart-footer" id="cart-footer" style="display: none;">
-            <div class="cart-total">
-                <span>Total:</span>
-                <span style="color: var(--primary-600);">₹<span id="modal-cart-total">0</span></span>
-            </div>
-            <button class="checkout-btn" onclick="checkout()">
-                <i class="fas fa-credit-card"></i>
-                Proceed to Checkout
-            </button>
-        </div>
+        <button class="checkout-btn" data-url="{% url 'checkout' %}" onclick="window.location.href=this.dataset.url">
+            Secure Checkout <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+    <div id="empty-drawer" style="padding:4rem 2rem; text-align:center;">
+        <i class="fas fa-shopping-basket" style="font-size:3rem; color:#f1f5f9; margin-bottom:1rem;"></i>
+        <p style="color:#94a3b8; font-weight:600;">Your basket is currently empty.</p>
     </div>
 </div>
 
 <script>
-    let cart = JSON.parse(localStorage.getItem('vedacareCart')) || [];
+    let cart = JSON.parse(localStorage.getItem('vedacare_cart')) || [];
 
-    function updateCartUI() {
-        const cartCount = document.getElementById('cart-count');
-        const cartTotal = document.getElementById('cart-total');
-        const modalCartTotal = document.getElementById('modal-cart-total');
+    function updateUI() {
+        const count = cart.reduce((s, i) => s + i.qty, 0);
+        const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
 
-        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const countEl = document.getElementById('cart-count');
+        const totalEl = document.getElementById('cart-total');
+        const modalEl = document.getElementById('modal-total');
 
-        cartCount.textContent = count;
-        cartTotal.textContent = total.toFixed(2);
-        modalCartTotal.textContent = total.toFixed(2);
+        if (countEl) countEl.innerText = count;
+        if (totalEl) totalEl.innerText = total.toFixed(2);
+        if (modalEl) modalEl.innerText = total.toFixed(2);
 
-        renderCartItems();
+        renderCart();
+        localStorage.setItem('vedacare_cart', JSON.stringify(cart));
     }
 
-    function addToCart(button) {
-        const id = button.dataset.id;
-        const name = button.dataset.name;
-        const price = parseFloat(button.dataset.price);
-        const image = button.dataset.image;
+    function addToCart(el) {
+        const item = {
+            id: el.dataset.id,
+            name: el.dataset.name,
+            price: parseFloat(el.dataset.price),
+            img: el.dataset.img,
+            qty: 1
+        };
 
-        const existingItem = cart.find(item => item.id === id);
+        const existing = cart.find(i => i.id === item.id);
+        if (existing) existing.qty++;
+        else cart.push(item);
 
-        if (existingItem) {
-            existingItem.quantity++;
-        } else {
-            cart.push({ id, name, price, image, quantity: 1 });
-        }
-
-        localStorage.setItem('vedacareCart', JSON.stringify(cart));
-        updateCartUI();
-
-        // Visual feedback
-        button.classList.add('added');
-        button.innerHTML = '<i class="fas fa-check"></i> Added';
+        el.classList.add('success');
+        el.innerHTML = '<i class="fas fa-check"></i>';
         setTimeout(() => {
-            button.classList.remove('added');
-            button.innerHTML = '<i class="fas fa-cart-plus"></i> Add';
-        }, 1500);
+            el.classList.remove('success');
+            el.innerHTML = '<i class="fas fa-plus"></i>';
+        }, 1200);
+
+        updateUI();
     }
 
-    function removeFromCart(id) {
-        cart = cart.filter(item => item.id !== id);
-        localStorage.setItem('vedacareCart', JSON.stringify(cart));
-        updateCartUI();
+    function remove(id) {
+        cart = cart.filter(i => i.id !== id);
+        updateUI();
     }
 
-    function renderCartItems() {
-        const cartItems = document.getElementById('cart-items');
-        const cartFooter = document.getElementById('cart-footer');
+    function renderCart() {
+        const box = document.getElementById('cart-items');
+        const footer = document.getElementById('drawer-footer');
+        const empty = document.getElementById('empty-drawer');
+
+        if (!box || !footer || !empty) return;
 
         if (cart.length === 0) {
-            cartItems.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-shopping-cart"></i>
-                    <h3>Your cart is empty</h3>
-                    <p>Add some herbal products to get started!</p>
-                </div>
-            `;
-            cartFooter.style.display = 'none';
+            box.innerHTML = '';
+            footer.style.display = 'none';
+            empty.style.display = 'block';
         } else {
-            cartItems.innerHTML = cart.map(item => `
-                <div class="cart-item">
-                    <img src="${item.image}" alt="${item.name}" class="cart-item-image">
-                    <div class="cart-item-details">
-                        <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-price">₹${item.price} × ${item.quantity}</div>
+            empty.style.display = 'none';
+            footer.style.display = 'block';
+            box.innerHTML = cart.map(i => `
+                <div class="cart-item-row">
+                    <img src="${i.img}" class="item-thumbnail">
+                    <div class="item-details">
+                        <div class="item-name">${i.name}</div>
+                        <div class="item-price">₹${i.price} × ${i.qty}</div>
+                        <span class="remove-trigger" onclick="remove('${i.id}')" style="color:#ef4444; cursor:pointer; font-size:0.85rem;">Remove Item</span>
                     </div>
-                    <button class="cart-item-remove" onclick="removeFromCart('${item.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
                 </div>
             `).join('');
-            cartFooter.style.display = 'block';
         }
     }
 
     function toggleCart() {
-        const modal = document.getElementById('cart-modal');
-        modal.classList.toggle('active');
+        document.getElementById('cart-drawer').classList.toggle('active');
+        document.getElementById('modal-overlay').classList.toggle('active');
     }
 
-    function checkout() {
-        if (cart.length === 0) {
-            alert('Your cart is empty!');
-            return;
-        }
-        window.location.href = "{% url 'checkout' %}";
-    }
-
-    // Search functionality
-    document.getElementById('search-input').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const products = document.querySelectorAll('.product-card');
-
-        products.forEach(product => {
-            const name = product.dataset.name;
-            if (name.includes(searchTerm)) {
-                product.style.display = 'block';
-            } else {
-                product.style.display = 'none';
-            }
+    // Filters
+    const searchInput = document.getElementById('shop-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', e => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.product-card').forEach(c => {
+                c.style.display = c.dataset.name.includes(term) ? 'flex' : 'none';
+            });
         });
-    });
+    }
 
-    // Sort functionality
-    document.getElementById('sort-select').addEventListener('change', (e) => {
-        const sortBy = e.target.value;
-        const grid = document.getElementById('products-grid');
-        const products = Array.from(document.querySelectorAll('.product-card'));
+    const sortSelect = document.getElementById('shop-sort');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', e => {
+            const val = e.target.value;
+            const grid = document.getElementById('product-grid');
+            if (!grid) return;
+            const prods = Array.from(grid.children);
 
-        products.sort((a, b) => {
-            if (sortBy === 'name') {
-                return a.dataset.name.localeCompare(b.dataset.name);
-            } else if (sortBy === 'price-low') {
-                return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-            } else if (sortBy === 'price-high') {
+            prods.sort((a, b) => {
+                if (val === 'name') return a.dataset.name.localeCompare(b.dataset.name);
+                if (val === 'price-asc') return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
                 return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
-            }
+            });
+            prods.forEach(p => grid.appendChild(p));
         });
+    }
 
-        products.forEach(product => grid.appendChild(product));
-    });
-
-    // Close modal on outside click
-    document.getElementById('cart-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'cart-modal') {
-            toggleCart();
-        }
-    });
-
-    // Initialize cart on page load
-    updateCartUI();
+    // Initial load
+    updateUI();
 </script>
 {% endblock %}

@@ -29,4 +29,5 @@ urlpatterns = [
     path('delete-account/', views.delete_account, name='delete_account'),
     path('notifications/', views.notifications_view, name='notifications'),
     path('rate-order/<int:order_id>/', views.rate_order, name='rate_order'),
+    path('admin-plants/import-csv/', views.import_botanicals_csv, name='import_botanicals_csv'),
 ]

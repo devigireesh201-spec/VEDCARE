@@ -1,349 +1,410 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Login - VedaCare{% endblock %}
+{% block title %}Sign In - VedaCare{% endblock %}
 
 {% block content %}
 <style>
-    .auth-container {
-        min-height: 80vh;
+    :root {
+        --auth-border: rgba(22, 163, 74, 0.1);
+        --auth-bg-glass: rgba(255, 255, 255, 0.8);
+    }
+
+    .auth-section {
+        min-height: 70vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2rem;
+        padding: 2rem 0;
     }
 
-    .auth-wrapper {
+    .auth-card {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        max-width: 1000px;
+        grid-template-columns: 1fr 1.1fr;
+        max-width: 1100px;
         width: 100%;
         background: white;
-        border-radius: var(--radius-2xl);
+        border-radius: 24px;
         overflow: hidden;
-        box-shadow: var(--shadow-2xl);
-        animation: scaleIn 0.5s ease-out;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--auth-border);
+        animation: cardFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    @keyframes cardFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Left Side: Visual Experience */
     .auth-visual {
-        background: var(--gradient-primary);
-        padding: 3rem;
+        background: linear-gradient(135deg, #14532d 0%, #16a34a 50%, #22c55e 100%);
+        color: white;
+        padding: 4rem;
+        position: relative;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: center;
-        color: white;
-        position: relative;
         overflow: hidden;
     }
 
     .auth-visual::before {
-        content: '';
+        content: '\f06c';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
         position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        animation: pulse 4s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-
-        0%,
-        100% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.1);
-        }
+        font-size: 25rem;
+        color: rgba(255, 255, 255, 0.05);
+        bottom: -5rem;
+        right: -5rem;
+        transform: rotate(-15deg);
     }
 
     .visual-content {
         position: relative;
-        z-index: 1;
-        text-align: center;
+        z-index: 2;
     }
 
-    .visual-icon {
-        font-size: 5rem;
+    .visual-tag {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
         margin-bottom: 2rem;
-        animation: float 3s ease-in-out infinite;
-    }
-
-    @keyframes float {
-
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(-20px);
-        }
+        backdrop-filter: blur(4px);
     }
 
     .visual-title {
-        font-size: 2rem;
-        font-family: var(--font-display);
-        margin-bottom: 1rem;
-        color: white;
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
     }
 
-    .visual-description {
-        font-size: 1.125rem;
-        opacity: 0.95;
+    .visual-desc {
+        font-size: 1.1rem;
         line-height: 1.6;
+        opacity: 0.9;
+        max-width: 400px;
     }
 
-    .auth-form-section {
-        padding: 3rem;
+    /* Right Side: Form Interaction */
+    .auth-form-side {
+        padding: 4rem;
+        background: #ffffff;
         display: flex;
         flex-direction: column;
         justify-content: center;
     }
 
-    .auth-header {
-        margin-bottom: 2rem;
+    .form-header {
+        margin-bottom: 2.5rem;
     }
 
-    .auth-title {
-        font-size: 2rem;
-        color: var(--gray-900);
+    .auth-form-side form {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: stretch;
+    }
+
+    .form-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        color: #14532d;
         margin-bottom: 0.5rem;
-        font-family: var(--font-display);
     }
 
-    .auth-subtitle {
-        color: var(--gray-600);
+    .form-subtitle {
+        color: #666;
         font-size: 1rem;
     }
 
-    .form-group {
+    .input-wrapper {
         margin-bottom: 1.5rem;
+        position: relative !important;
+        width: 100% !important;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
     }
 
-    .form-label {
+    .input-wrapper i {
+        position: absolute;
+        left: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #2e7d32;
+        transition: color 0.3s;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    .premium-input {
+        width: 100% !important;
+        flex: 1;
         display: block;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 0.5rem;
-        font-size: 0.95rem;
-    }
-
-    .form-input {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-md);
-        font-family: var(--font-primary);
+        padding: 1.1rem 4rem 1.1rem 3.2rem;
+        border: 2px solid #eef2f6;
+        border-radius: 12px;
+        font-family: inherit;
         font-size: 1rem;
         transition: all 0.3s ease;
+        background: #f8faff;
         box-sizing: border-box;
     }
 
-    .form-input:focus {
+    .premium-input:focus {
         outline: none;
-        border-color: var(--primary-500);
-        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        border-color: #22c55e;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
     }
 
-    .form-input::placeholder {
-        color: var(--gray-400);
+    .premium-input:focus+i {
+        color: #15803d;
     }
 
-    .submit-btn {
+    .eye-toggle {
+        position: absolute !important;
+        right: 1.2rem !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: none;
+        border: none;
+        color: #8898aa;
+        cursor: pointer;
+        padding: 8px;
+        transition: all 0.3s ease;
+        z-index: 20;
+        font-size: 0.95rem;
+    }
+
+    .eye-toggle:hover {
+        color: #16a34a;
+        transform: translateY(-50%) scale(1.1) !important;
+    }
+
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: -0.5rem;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+    }
+
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        color: #555;
+    }
+
+    .remember-me input {
+        width: 18px;
+        height: 18px;
+        accent-color: #2e7d32;
+    }
+
+    .forgot-link {
+        color: #2e7d32;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .forgot-link:hover {
+        color: #1b5e20;
+        text-decoration: underline;
+    }
+
+    .sign-in-btn {
         width: 100%;
-        padding: 1rem;
-        background: var(--gradient-primary);
+        padding: 1.2rem;
+        background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
         color: white;
         border: none;
-        border-radius: var(--radius-lg);
-        font-size: 1.125rem;
-        font-weight: 600;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: var(--shadow-md);
-        margin-top: 1rem;
+        transition: all 0.3s;
+        box-shadow: 0 10px 25px rgba(46, 125, 50, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
     }
 
-    .submit-btn:hover {
-        box-shadow: var(--shadow-xl), var(--shadow-glow);
-        transform: translateY(-2px);
+    .sign-in-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(46, 125, 50, 0.3);
+        background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%);
     }
 
     .auth-footer {
         margin-top: 2rem;
         text-align: center;
-        color: var(--gray-600);
+        color: #666;
+        font-size: 0.95rem;
     }
 
-    .auth-footer a {
-        color: var(--primary-600);
+    .register-btn {
+        color: #2e7d32;
         text-decoration: none;
-        font-weight: 600;
-        transition: color 0.3s ease;
+        font-weight: 700;
+        transition: color 0.3s;
     }
 
-    .auth-footer a:hover {
-        color: var(--primary-700);
-        text-decoration: underline;
+    .register-btn:hover {
+        color: #1b5e20;
     }
 
-    .divider {
+    /* Error Styling */
+    .login-error {
+        background: #fee2e2;
+        border-left: 4px solid #ef4444;
+        color: #991b1b;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
         display: flex;
         align-items: center;
-        margin: 1.5rem 0;
-        color: var(--gray-500);
-        font-size: 0.875rem;
+        gap: 10px;
     }
 
-    .divider::before,
-    .divider::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: var(--gray-200);
-    }
-
-    .divider::before {
-        margin-right: 1rem;
-    }
-
-    .divider::after {
-        margin-left: 1rem;
-    }
-
-    .error-message {
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 0.75rem 1rem;
-        border-radius: var(--radius-md);
-        margin-bottom: 1rem;
-        border-left: 4px solid #ef4444;
-        font-size: 0.875rem;
-    }
-
-    @media (max-width: 768px) {
-        .auth-wrapper {
+    @media (max-width: 900px) {
+        .auth-card {
             grid-template-columns: 1fr;
+            max-width: 500px;
         }
 
         .auth-visual {
             padding: 2rem;
-            min-height: 200px;
+            text-align: center;
+            align-items: center;
         }
 
-        .visual-icon {
-            font-size: 3rem;
+        .auth-visual::before {
+            font-size: 15rem;
+        }
+
+        .auth-form-side {
+            padding: 3rem 2rem;
         }
 
         .visual-title {
-            font-size: 1.5rem;
-        }
-
-        .auth-form-section {
-            padding: 2rem;
+            font-size: 2.2rem;
         }
     }
 </style>
 
-<div class="auth-container">
-    <div class="auth-wrapper">
+<section class="auth-section">
+    <div class="auth-card">
+        <!-- Visual Component -->
         <div class="auth-visual">
             <div class="visual-content">
-                <div class="visual-icon">🌿</div>
-                <h2 class="visual-title">Welcome Back!</h2>
-                <p class="visual-description">
-                    Continue your journey towards natural wellness with VedaCare's
-                    AI-powered Ayurvedic solutions.
+                <span class="visual-tag">Nature's Wisdom</span>
+                <h1 class="visual-title">Welcome<br>Back Home.</h1>
+                <p class="visual-desc">
+                    Rejoin the path of holistic wellness. Discover the ancient power of herbs through AI-driven
+                    insights.
                 </p>
+
+                <div style="margin-top: 3rem; display: flex; gap: 20px;">
+                    <div style="text-align:center;">
+                        <div style="font-size:1.5rem; font-weight:700;">10k+</div>
+                        <div style="font-size:0.75rem; opacity:0.8;">Herbalists</div>
+                    </div>
+                    <div style="height:35px; width:1px; background:rgba(255,255,255,0.2);"></div>
+                    <div style="text-align:center;">
+                        <div style="font-size:1.5rem; font-weight:700;">500+</div>
+                        <div style="font-size:0.75rem; opacity:0.8;">Plants</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="auth-form-section">
-            <div class="auth-header">
-                <h1 class="auth-title">Sign In</h1>
-                <p class="auth-subtitle">Access your personalized wellness dashboard</p>
+        <!-- Form Component -->
+        <div class="auth-form-side">
+            <div class="form-header">
+                <h2 class="form-title">Login</h2>
+                <p class="form-subtitle">Secure your wellness journey.</p>
             </div>
 
             {% if form.errors %}
-            <div class="error-message">
+            <div class="login-error">
                 <i class="fas fa-exclamation-circle"></i>
-                Invalid username or password. Please try again.
+                Invalid credentials. Please verify and try again.
             </div>
             {% endif %}
 
             <form method="POST">
                 {% csrf_token %}
 
-                <div class="form-group">
-                    <label for="id_username" class="form-label">
-                        <i class="fas fa-user"></i> Username
-                    </label>
-                    <input type="text" name="username" id="id_username" class="form-input"
-                        placeholder="Enter your username" required autofocus>
+                <div class="input-wrapper">
+                    <input type="text" name="username" id="id_username" class="premium-input" placeholder="Username"
+                        required autofocus>
+                    <i class="fas fa-user-circle"></i>
                 </div>
 
-                <div class="form-group">
-                    <label for="id_password" class="form-label">
-                        <i class="fas fa-lock"></i> Password
-                    </label>
-                    <div style="position: relative;">
-                        <input type="password" name="password" id="id_password" class="form-input"
-                            placeholder="Enter your password" required style="padding-right: 3rem;">
-                        <button type="button" onclick="togglePassword('id_password', this)"
-                            style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--gray-500); cursor: pointer; font-size: 1.1rem; padding: 0.5rem;">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    <div style="text-align: right; margin-top: 0.5rem;">
-                        <a href="{% url 'password_reset' %}"
-                            style="font-size: 0.875rem; color: var(--gray-500); text-decoration: none;">
-                            Forgot Password?
-                        </a>
-                    </div>
+                <div class="input-wrapper">
+                    <input type="password" name="password" id="id_password" class="premium-input" placeholder="Password"
+                        required>
+                    <i class="fas fa-shield-halved"></i>
+                    <button type="button" class="eye-toggle" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
 
-                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
-                    <input type="checkbox" name="remember_me" id="remember_me" style="width: auto; cursor: pointer;">
-                    <label for="remember_me" class="form-label"
-                        style="margin-bottom: 0; cursor: pointer; font-size: 0.875rem;">
-                        Remember me for 30 days
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember_me">
+                        Remember me
                     </label>
+                    <a href="{% url 'password_reset' %}" class="forgot-link">Forgot password?</a>
                 </div>
 
-                <button type="submit" class="submit-btn">
-                    <i class="fas fa-sign-in-alt"></i> Sign In
+                <button type="submit" class="sign-in-btn">
+                    <span>Sign In</span>
+                    <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
 
             <div class="auth-footer">
-                <p>
-                    Don't have an account?
-                    <a href="{% url 'register' %}">
-                        <i class="fas fa-user-plus"></i> Create Account
-                    </a>
-                </p>
+                <p>New to VedaCare? <a href="{% url 'register' %}" class="register-btn">Create Account</a></p>
             </div>
         </div>
     </div>
-</div>
+</section>
 
 <script>
-    function togglePassword(inputId, button) {
-        const input = document.getElementById(inputId);
-        const icon = button.querySelector('i');
+    document.getElementById('togglePassword').addEventListener('click', function (e) {
+        const passwordInput = document.getElementById('id_password');
+        const icon = this.querySelector('i');
 
-        if (input.type === 'password') {
-            input.type = 'text';
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
             icon.classList.remove('fa-eye');
             icon.classList.add('fa-eye-slash');
         } else {
-            input.type = 'password';
+            passwordInput.type = 'password';
             icon.classList.remove('fa-eye-slash');
             icon.classList.add('fa-eye');
         }
-    }
+    });
 </script>
 {% endblock %}

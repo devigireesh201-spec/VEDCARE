@@ -1,400 +1,500 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block content %}
+{% block extra_css %}
 <style>
     /* Hero Section */
-    .hero-section {
-        position: relative;
-        min-height: 90vh;
+    .hero {
+        min-height: 100vh;
         display: flex;
         align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #14532d 0%, #16a34a 50%, #22c55e 100%);
-        overflow: hidden;
-    }
-
-    .hero-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-        background-size: cover;
-        background-position: bottom;
-        opacity: 0.3;
+        padding: 0 5%;
+        position: relative;
+        margin-top: -80px;
+        /* Offset the sticky navbar to allow transparent hero */
     }
 
     .hero-content {
-        position: relative;
-        z-index: 1;
-        text-align: center;
-        color: white;
-        max-width: 900px;
-        padding: 2rem;
-        animation: fadeIn 1s ease-out;
+        flex: 1;
+        max-width: 50%;
+        z-index: 10;
+        padding-right: 2rem;
     }
 
     .hero-title {
         font-family: var(--font-display);
-        font-size: 4rem;
-        font-weight: 700;
+        font-size: 5.5rem;
+        color: var(--primary);
         margin-bottom: 1.5rem;
         line-height: 1.1;
-        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        animation: slideRight 1s ease-out backwards;
+        text-shadow: 2px 4px 10px rgba(46, 125, 50, 0.1);
     }
 
-    .hero-subtitle {
-        font-size: 1.5rem;
-        margin-bottom: 2rem;
-        opacity: 0.95;
-        font-weight: 300;
-        line-height: 1.6;
+    .hero-desc {
+        font-size: 1.3rem;
+        color: var(--primary-dark);
+        opacity: 0.9;
+        line-height: 1.8;
+        margin-bottom: 2.5rem;
+        font-weight: 400;
+        animation: slideRight 1s ease-out 0.2s backwards;
     }
 
-    .hero-buttons {
-        display: flex;
-        gap: 1.5rem;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-top: 2.5rem;
-    }
-
-    .hero-btn {
-        padding: 1.25rem 2.5rem;
-        font-size: 1.125rem;
-        font-weight: 600;
-        border-radius: var(--radius-full);
-        text-decoration: none;
-        transition: all 0.3s ease;
+    .btn-main {
         display: inline-flex;
         align-items: center;
-        gap: 0.75rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    .hero-btn-primary {
-        background: white;
-        color: var(--primary-700);
-    }
-
-    .hero-btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .hero-btn-secondary {
-        background: rgba(255, 255, 255, 0.2);
+        gap: 12px;
+        padding: 1.2rem 2.8rem;
+        font-size: 1.2rem;
+        background: var(--primary);
         color: white;
-        border: 2px solid white;
-        backdrop-filter: blur(10px);
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s;
+        animation: slideRight 1s ease-out 0.4s backwards;
+        box-shadow: 0 10px 30px rgba(46, 125, 50, 0.3);
     }
 
-    .hero-btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: translateY(-3px);
+    .btn-main:hover {
+        background: var(--primary-dark);
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(46, 125, 50, 0.5);
+    }
+
+    @keyframes slideRight {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Patterns */
+    .hero-visual {
+        flex: 1;
+        position: relative;
+        height: 600px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .pattern-group {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .triangle-outer {
+        position: absolute;
+        width: 480px;
+        height: 480px;
+        background: rgba(46, 125, 50, 0.05);
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        animation: rotateOuter 25s linear infinite;
+    }
+
+    .triangle-inner {
+        position: absolute;
+        width: 340px;
+        height: 340px;
+        background: rgba(46, 125, 50, 0.08);
+        clip-path: polygon(50% 100%, 0 0, 100% 0);
+        animation: rotateInner 15s linear infinite;
+    }
+
+    @keyframes rotateOuter {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes rotateInner {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(-360deg);
+        }
+    }
+
+    .circle-bg {
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        border: 8px solid white;
+        box-shadow: 0 20px 50px rgba(46, 125, 50, 0.2);
+        background: #f0fdf4;
+        z-index: 5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .slide-image {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        object-fit: contain;
+        z-index: 6;
+        opacity: 0;
+        filter: drop-shadow(0 6px 12px rgba(46, 125, 50, 0.25));
+        transform: translateX(0) rotate(0deg);
+        transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease-in;
+        border-radius: 50%;
+    }
+
+    .slide-image.active {
+        opacity: 1;
+        transform: translateX(0) rotate(0deg);
+    }
+
+    .slide-image.exiting {
+        transform: translateX(-100vw) rotate(-90deg);
+        opacity: 0;
+    }
+
+    .slide-image.entering {
+        transform: translateX(100vw) rotate(90deg);
+        opacity: 0;
+    }
+
+    .slide-image.prev {
+        transform: translateX(-100vw) rotate(-90deg);
+        opacity: 0;
+    }
+
+    .falling-leaf {
+        position: absolute;
+        color: var(--primary-light);
+        opacity: 0.6;
+        animation: floatLeaf 8s ease-in-out infinite;
+        z-index: 1;
+        filter: drop-shadow(2px 4px 6px rgba(46, 125, 50, 0.2));
+    }
+
+    .lf-1 {
+        top: 15%;
+        right: 10%;
+        font-size: 3.5rem;
+        animation-delay: 0s;
+    }
+
+    .lf-2 {
+        top: 50%;
+        left: 5%;
+        font-size: 2.5rem;
+        animation-delay: 2s;
+        color: var(--primary);
+    }
+
+    .lf-3 {
+        bottom: 10%;
+        right: 30%;
+        font-size: 3rem;
+        animation-delay: 4s;
+    }
+
+    @keyframes floatLeaf {
+        0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.6;
+        }
+
+        50% {
+            transform: translateY(-40px) rotate(45deg);
+            opacity: 0.9;
+        }
+
+        100% {
+            transform: translateY(0) rotate(90deg);
+            opacity: 0.6;
+        }
     }
 
     /* Features Section */
     .features-section {
-        padding: 5rem 2rem;
-        background: white;
+        padding: 5rem 0rem 2rem 0rem;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
     }
 
     .section-title {
-        text-align: center;
-        font-size: 2.5rem;
-        color: var(--gray-900);
-        margin-bottom: 1rem;
         font-family: var(--font-display);
+        font-size: 3.5rem;
+        color: var(--primary-dark);
+        margin-bottom: 1rem;
     }
 
-    .section-subtitle {
-        text-align: center;
-        font-size: 1.125rem;
-        color: var(--gray-600);
-        margin-bottom: 3rem;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 2rem;
-        max-width: 1200px;
+    .features-container {
+        display: flex;
+        gap: 2.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        max-width: 1300px;
         margin: 0 auto;
     }
 
-    .feature-card {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
-        border-radius: var(--radius-2xl);
-        padding: 2.5rem;
+    .feature-box {
+        background: white;
+        flex: 1;
+        min-width: 320px;
+        padding: 4rem 2.5rem;
+        border-radius: 20px;
         text-align: center;
-        transition: all 0.4s ease;
-        border: 2px solid transparent;
+        box-shadow: 0 10px 40px rgba(46, 125, 50, 0.08);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
         overflow: hidden;
+        border: 2px solid transparent;
+        text-decoration: none;
+        color: inherit;
+        display: block;
     }
 
-    .feature-card::before {
+    .feature-box::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
-        right: 0;
-        height: 4px;
-        background: var(--gradient-primary);
+        width: 100%;
+        height: 6px;
+        background: var(--primary);
         transform: scaleX(0);
         transition: transform 0.4s ease;
     }
 
-    .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(22, 163, 74, 0.2);
-        border-color: var(--primary-200);
+    .feature-box:hover {
+        transform: translateY(-20px);
+        box-shadow: 0 25px 50px rgba(46, 125, 50, 0.15);
+        border-color: rgba(46, 125, 50, 0.1);
     }
 
-    .feature-card:hover::before {
+    .feature-box:hover::before {
         transform: scaleX(1);
     }
 
-    .feature-icon {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 1.5rem;
-        background: var(--gradient-primary);
-        border-radius: var(--radius-xl);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-        box-shadow: 0 10px 25px rgba(22, 163, 74, 0.3);
-        transition: transform 0.3s ease;
-    }
-
-    .feature-card:hover .feature-icon {
-        transform: scale(1.1) rotate(5deg);
-    }
-
-    .feature-title {
-        font-size: 1.5rem;
-        color: var(--gray-900);
-        margin-bottom: 1rem;
-        font-weight: 700;
-    }
-
-    .feature-description {
-        color: var(--gray-600);
-        line-height: 1.7;
-        margin-bottom: 1.5rem;
-    }
-
-    .feature-link {
-        color: var(--primary-600);
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: gap 0.3s ease;
-    }
-
-    .feature-link:hover {
-        gap: 0.75rem;
-    }
-
-    /* Stats Section */
-    .stats-section {
-        padding: 4rem 2rem;
-        background: var(--gradient-primary);
-        color: white;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 3rem;
-        max-width: 1000px;
-        margin: 0 auto;
-        text-align: center;
-    }
-
-    .stat-item {
-        animation: fadeIn 1s ease-out;
-    }
-
-    .stat-number {
-        font-size: 3rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        font-family: var(--font-display);
-    }
-
-    .stat-label {
-        font-size: 1rem;
-        opacity: 0.9;
-    }
-
-    /* CTA Section */
-    .cta-section {
-        padding: 5rem 2rem;
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        text-align: center;
-    }
-
-    .cta-content {
-        max-width: 700px;
-        margin: 0 auto;
-    }
-
-    .cta-title {
-        font-size: 2.5rem;
-        color: var(--gray-900);
-        margin-bottom: 1rem;
-        font-family: var(--font-display);
-    }
-
-    .cta-description {
-        font-size: 1.125rem;
-        color: var(--gray-600);
+    .f-icon {
+        font-size: 4.5rem;
+        color: var(--primary);
         margin-bottom: 2rem;
+        transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: inline-block;
+    }
+
+    .feature-box:hover .f-icon {
+        transform: scale(1.15) translateY(-10px);
+    }
+
+    .f-title {
+        font-size: 1.8rem;
+        color: var(--primary-dark);
+        margin-bottom: 1.2rem;
+        font-family: var(--font-display);
+        font-weight: 700;
+    }
+
+    .f-desc {
+        color: rgba(46, 125, 50, 0.8);
+        line-height: 1.7;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 1024px) {
+        .hero-title {
+            font-size: 4rem;
+        }
+
+        .hero-visual {
+            height: 500px;
+        }
+
+        .pattern-group {
+            transform: scale(0.85);
+        }
     }
 
     @media (max-width: 768px) {
-        .hero-title {
-            font-size: 2.5rem;
-        }
-
-        .hero-subtitle {
-            font-size: 1.125rem;
-        }
-
-        .hero-buttons {
+        .hero {
             flex-direction: column;
-            align-items: stretch;
+            padding-top: 8rem;
+            text-align: center;
         }
 
-        .hero-btn {
+        .hero-content {
+            max-width: 100%;
+            margin-bottom: 3rem;
+            padding-right: 0;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+        }
+
+        .hero-visual {
             width: 100%;
-            justify-content: center;
+            height: 400px;
+        }
+
+        .pattern-group {
+            transform: scale(0.7);
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem 5%;
+        }
+
+        .slide-image {
+            width: 150px;
+            height: 150px;
+        }
+
+        .circle-bg {
+            width: 200px;
+            height: 200px;
+        }
+
+        .triangle-inner {
+            width: 250px;
+            height: 250px;
+        }
+
+        .triangle-outer {
+            width: 350px;
+            height: 350px;
         }
     }
 </style>
+{% endblock %}
 
+{% block content %}
 <!-- Hero Section -->
-<section class="hero-section">
+<section class="hero" id="home">
     <div class="hero-content">
-        <h1 class="hero-title">
-            Nature's Wisdom,<br>Verified by AI
-        </h1>
-        <p class="hero-subtitle">
-            Discover the healing power of Ayurvedic herbs with cutting-edge AI technology.
-            Identify plants, analyze symptoms, and access authentic herbal remedies.
+        <h1 class="hero-title">Vedacare</h1>
+        <p class="hero-desc">
+            Discover the healing power of nature. Vedacare intelligently detects herbal plants and provides
+            comprehensive insights into their traditional treatments, medicinal properties, and holistic uses.
         </p>
-        <div class="hero-buttons">
-            {% if user.is_authenticated %}
-            <a href="{% url 'dashboard' %}" class="hero-btn hero-btn-primary">
-                <i class="fas fa-th-large"></i>
-                Go to Dashboard
-            </a>
-            {% else %}
-            <a href="{% url 'register' %}" class="hero-btn hero-btn-primary">
-                <i class="fas fa-user-plus"></i>
-                Get Started Free
-            </a>
-            <a href="{% url 'login' %}" class="hero-btn hero-btn-secondary">
-                <i class="fas fa-sign-in-alt"></i>
-                Sign In
-            </a>
-            {% endif %}
+        {% if user.is_authenticated %}
+        <a href="{% url 'identify_plant' %}" class="btn-main">
+            Scan Your Plant <i class="fas fa-camera"></i>
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn-main">
+            Scan Your Plant <i class="fas fa-camera"></i>
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="hero-visual">
+        <div class="falling-leaf lf-1"><i class="fas fa-leaf"></i></div>
+        <div class="falling-leaf lf-2"><i class="fas fa-seedling"></i></div>
+        <div class="falling-leaf lf-3"><i class="fab fa-envira"></i></div>
+
+        <div class="pattern-group">
+            <div class="triangle-outer"></div>
+            <div class="triangle-inner"></div>
+
+            <div class="circle-bg">
+                <img src="{% static 'plant_1.png' %}" alt="Herbal Plant 1" class="slide-image active"
+                    onerror="this.src='https://cdn-icons-png.flaticon.com/512/628/628283.png'">
+                <img src="{% static 'plant_2.png' %}" alt="Herbal Plant 2" class="slide-image"
+                    onerror="this.src='https://cdn-icons-png.flaticon.com/512/2928/2928883.png'">
+                <img src="{% static 'plant_3.png' %}" alt="Herbal Plant 3" class="slide-image"
+                    onerror="this.src='https://cdn-icons-png.flaticon.com/512/892/892926.png'">
+            </div>
         </div>
     </div>
 </section>
 
 <!-- Features Section -->
-<section class="features-section">
-    <h2 class="section-title">Powerful Features for Your Wellness Journey</h2>
-    <p class="section-subtitle">
-        Experience the perfect blend of ancient Ayurvedic knowledge and modern AI technology
-    </p>
-
-    <div class="features-grid">
-        <div class="feature-card">
-            <div class="feature-icon">📸</div>
-            <h3 class="feature-title">AI Plant Scanner</h3>
-            <p class="feature-description">
-                Simply capture a photo of any plant and our advanced AI will identify it instantly,
-                providing detailed information about its medicinal properties and uses.
-            </p>
-            <a href="{% url 'identify_plant' %}" class="feature-link">
-                Try Scanner <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-
-        <div class="feature-card">
-            <div class="feature-icon">🩺</div>
-            <h3 class="feature-title">Symptom Analyzer</h3>
-            <p class="feature-description">
-                Describe your symptoms and receive personalized Ayurvedic remedy recommendations
-                based on centuries-old wisdom and modern diagnostics.
-            </p>
-            <a href="{% url 'symptoms' %}" class="feature-link">
-                Check Symptoms <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-
-        <div class="feature-card">
-            <div class="feature-icon">🛒</div>
-            <h3 class="feature-title">Herbal E-Kart</h3>
-            <p class="feature-description">
-                Shop authentic herbal plants, seeds, and remedies with secure payment options
-                and real-time order tracking for your convenience.
-            </p>
-            <a href="{% url 'ekart' %}" class="feature-link">
-                Browse Store <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
+<section class="features-section" id="features">
+    <div class="section-header">
+        <h2 class="section-title">Our Modules & Features</h2>
+        <p style="color: var(--primary); font-size: 1.2rem; margin-top:-10px;">The perfect blend of nature and
+            technology.</p>
     </div>
-</section>
 
-<!-- Stats Section -->
-<section class="stats-section">
-    <div class="stats-grid">
-        <div class="stat-item">
-            <div class="stat-number">500+</div>
-            <div class="stat-label">Herbal Plants Database</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">98%</div>
-            <div class="stat-label">Identification Accuracy</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">10K+</div>
-            <div class="stat-label">Happy Users</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">24/7</div>
-            <div class="stat-label">AI Support Available</div>
-        </div>
-    </div>
-</section>
-
-<!-- CTA Section -->
-<section class="cta-section">
-    <div class="cta-content">
-        <h2 class="cta-title">Ready to Start Your Wellness Journey?</h2>
-        <p class="cta-description">
-            Join thousands of users who trust VedaCare for authentic Ayurvedic solutions
-        </p>
-        {% if not user.is_authenticated %}
-        <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
-            <i class="fas fa-user-plus"></i>
-            Create Free Account
+    <div class="features-container">
+        <a href="{% url 'identify_plant' %}" class="feature-box">
+            <i class="fas fa-seedling f-icon"></i>
+            <h3 class="f-title">Plant Detection</h3>
+            <p class="f-desc">Upload or take a picture of any plant, and our AI will identify it instantly with high
+                accuracy, revealing its species and properties.</p>
         </a>
-        {% endif %}
+
+        <a href="{% url 'symptoms' %}" class="feature-box">
+            <i class="fas fa-hand-holding-medical f-icon"></i>
+            <h3 class="f-title">Treatment Guide</h3>
+            <p class="f-desc">Access comprehensive traditional and modern medicinal uses for verified herbal plants,
+                curated by botanist experts.</p>
+        </a>
+
+        <a href="{% url 'remedies' %}" class="feature-box">
+            <i class="fas fa-mortar-pestle f-icon"></i>
+            <h3 class="f-title">Remedy Recipes</h3>
+            <p class="f-desc">Step-by-step interactive instructions on how to prepare herbal remedies, teas, and natural
+                treatments safely at home.</p>
+        </a>
     </div>
 </section>
+<br><br>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Image slider effect — first image shows immediately, transitions kick in for subsequent slides
+    const slides = document.querySelectorAll('.slide-image');
+    let currentSlide = 0;
+
+    function nextSlide() {
+        if (slides.length === 0) return;
+
+        // Exit the current slide to the left
+        slides[currentSlide].classList.remove('active');
+        slides[currentSlide].classList.add('prev');
+
+        // Move to next slide
+        currentSlide = (currentSlide + 1) % slides.length;
+
+        // Position next slide off screen to the right (no transition yet)
+        slides[currentSlide].classList.remove('prev', 'active');
+        slides[currentSlide].style.transition = 'none';
+        slides[currentSlide].style.transform = 'translateX(100vw) rotate(90deg)';
+        slides[currentSlide].style.opacity = '0';
+
+        // Force browser repaint to apply the reset position
+        void slides[currentSlide].offsetWidth;
+
+        // Re-apply transition and slide the new image into the active circle
+        slides[currentSlide].style.transition = 'transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease-in';
+        slides[currentSlide].style.transform = '';
+        slides[currentSlide].style.opacity = '';
+        slides[currentSlide].classList.add('active');
+    }
+
+    if (slides.length > 0) {
+        setInterval(nextSlide, 3500);
+    }
+</script>
 {% endblock %}

@@ -16,6 +16,8 @@ from django.views.decorators.csrf import csrf_exempt
 import base64
 import requests
 import random
+import csv
+import io
 from django.db.models import Sum, Avg
 
 # --- MODULE 1: AUTHENTICATION VIEWS ---
@@ -646,6 +648,12 @@ def profile_view(request):
         profile.gender = gender
         profile.medical_history = medical_history or ''
         profile.allergies = allergies or ''
+        
+        # Handle File Upload
+        medical_report = request.FILES.get('medical_report')
+        if medical_report:
+            profile.medical_report = medical_report
+            
         profile.save()
         
         messages.success(request, "✅ Profile updated successfully!")
@@ -805,3 +813,38 @@ def export_sales_pdf(request):
     filename = f"VedaCare_Sales_Report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+@staff_member_required
+def import_botanicals_csv(request):
+    """Bulk import plants from a CSV file."""
+    if request.method == 'POST' and request.FILES.get('csv_file'):
+        csv_file = request.FILES['csv_file']
+        
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, '❌ Please upload a valid CSV file.')
+            return redirect('admin_plants')
+            
+        try:
+            decoded_file = csv_file.read().decode('utf-8')
+            io_string = io.StringIO(decoded_file)
+            reader = csv.DictReader(io_string)
+            
+            plants_created = 0
+            for row in reader:
+                AyurvedicPlant.objects.create(
+                    name=row.get('name'),
+                    scientific_name=row.get('scientific_name'),
+                    medicinal_use=row.get('medicinal_use'),
+                    properties=row.get('properties'),
+                    habitat=row.get('habitat'),
+                    preparation_method=row.get('preparation_method'),
+                    precautions=row.get('precautions'),
+                    price=float(row.get('price', 0))
+                )
+                plants_created += 1
+                
+            messages.success(request, f'✅ Successfully imported {plants_created} botanical entries.')
+        except Exception as e:
+            messages.error(request, f'❌ Error during import: {str(e)}')
+            
+    return redirect('admin_plants')

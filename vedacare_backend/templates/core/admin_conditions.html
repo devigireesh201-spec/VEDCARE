@@ -264,7 +264,7 @@
                         <td>
                             <div class="action-group">
                                 <button class="btn-icon-sm"
-                                    onclick='editCondition({{ condition.id }}, "{{ condition.name|escapejs }}", "{{ condition.keywords|escapejs }}", "{{ condition.remedy|escapejs }}", "{{ condition.preparation|escapejs }}", "{{ condition.search_terms|escapejs }}")'><i
+                                    onclick="editCondition('{{ condition.id }}', '{{ condition.name|escapejs }}', '{{ condition.keywords|escapejs }}', '{{ condition.remedy|escapejs }}', '{{ condition.preparation|escapejs }}', '{{ condition.search_terms|escapejs }}')"><i
                                         class="fas fa-edit"></i></button>
                                 <a href="{% url 'delete_condition' condition.id %}"
                                     onclick="return confirm('Delete this logic rule?')" class="btn-icon-sm"
