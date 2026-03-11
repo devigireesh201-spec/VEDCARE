@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('about/', views.about_view, name='about'),
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
@@ -18,6 +19,7 @@ urlpatterns = [
     path('admin-conditions/', views.admin_conditions, name='admin_conditions'),
     path('admin-plants/delete/<int:pk>/', views.delete_plant, name='delete_plant'),
     path('admin-conditions/delete/<int:pk>/', views.delete_condition, name='delete_condition'),
+    path('admin-conditions/import-csv/', views.import_conditions_csv, name='import_conditions_csv'),
     path('admin-notifications/', views.admin_notifications, name='admin_notifications'),
     path('admin-analytics/export-pdf/', views.export_sales_pdf, name='export_sales_pdf'),
     path('identify/', views.identify_plant, name='identify_plant'),

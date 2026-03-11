@@ -229,10 +229,22 @@
                 <h1>Disease & Symptom Logic</h1>
                 <p>Configure the AI diagnostic engine's keyword matching and remedies.</p>
             </div>
-            <button onclick="openModal()" class="btn-primary-admin"
-                style="padding: 0.875rem 1.5rem; border-radius: var(--radius-lg); border: none; font-weight: 700; cursor: pointer; color: white; background: var(--admin-primary); display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-plus"></i> New Logic Rule
-            </button>
+            <div class="header-actions" style="display: flex; gap: 1rem; align-items: center;">
+                <form action="{% url 'import_conditions_csv' %}" method="POST" enctype="multipart/form-data" 
+                    style="display: flex; gap: 0.5rem; align-items: center; background: white; padding: 0.5rem 1rem; border-radius: var(--radius-lg); border: 1px solid var(--gray-200);">
+                    {% csrf_token %}
+                    <label for="csv_file" style="font-size: 0.8rem; font-weight: 600; color: var(--gray-500);">Bulk Import:</label>
+                    <input type="file" name="csv_file" id="csv_file" accept=".csv" required 
+                        style="font-size: 0.75rem; width: 150px;">
+                    <button type="submit" class="btn-icon-sm" title="Upload CSV">
+                        <i class="fas fa-file-import"></i>
+                    </button>
+                </form>
+                <button onclick="openModal()" class="btn-primary-admin"
+                    style="padding: 0.875rem 1.5rem; border-radius: var(--radius-lg); border: none; font-weight: 700; cursor: pointer; color: white; background: var(--admin-primary); display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-plus"></i> New Logic Rule
+                </button>
+            </div>
         </div>
 
         <div class="content-card">

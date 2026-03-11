@@ -11,20 +11,25 @@ from .models import UserProfile, AyurvedicPlant, HealthReport, Order, Notificati
 from .ai_engine import predict_ayurveda
 import json
 from django.http import JsonResponse
-from django.db.models import Count, Q
+from django.db.models import Sum, Avg, Count, Q
+from django.db.models.functions import TruncMonth
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 import base64
 import requests
 import random
 import csv
 import io
-from django.db.models import Sum, Avg
 
 # --- MODULE 1: AUTHENTICATION VIEWS ---
 
 def home(request):
     """Landing Page view."""
     return render(request, 'core/home.html')
+
+def about_view(request):
+    """About Us Page view."""
+    return render(request, 'core/about.html')
 
 def register_view(request):
     """User Registration Module."""
@@ -144,9 +149,11 @@ def symptom_checker(request):
             # Start with an empty query
             query = Q()
             
-            # 1. Search for AI suggested keywords in name, use, and properties
-            for term in search_terms:
-                query |= Q(name__icontains=term) | Q(medicinal_use__icontains=term) | Q(properties__icontains=term)
+            # Fetch the matching plants
+            important_terms = [t.strip() for t in search_terms if t.strip()]
+            if important_terms:
+                for term in important_terms:
+                    query |= Q(name__icontains=term) | Q(medicinal_use__icontains=term) | Q(properties__icontains=term)
             
             # 2. Check if user mentioned any plant names or keywords specifically
             user_words = user_input.lower().split()
@@ -157,7 +164,10 @@ def symptom_checker(request):
                        query |= Q(medicinal_use__icontains=word) | Q(properties__icontains=word)
 
             # Fetch the matching plants
-            recommended_plants = AyurvedicPlant.objects.filter(query).distinct()[:5]
+            if query != Q():
+                recommended_plants = AyurvedicPlant.objects.filter(query).distinct()[:5]
+            else:
+                recommended_plants = AyurvedicPlant.objects.none()
 
             # 3. Fallback: If no plants found, just show first few
             if not recommended_plants.exists():
@@ -275,21 +285,72 @@ def payment_success(request):
 
 @staff_member_required
 def admin_analytics(request):
-    """Admin Module 7: Analytics & Reports."""
-    # Count occurrences of each predicted disease
-    disease_stats = HealthReport.objects.values('predicted_disease').annotate(count=Count('predicted_disease')).order_by('-count')
-    
-    # Get total counts for summary cards
+    """Admin Module 7: Advanced Sales & Health Reporting Dashboard."""
+    # --- 1. KPI TARGETS (Hardcoded for Demo) ---
+    SALES_TARGET = 5000000
+    actual_sales = float(Order.objects.aggregate(total=Sum('total_price'))['total'] or 0)
+    if SALES_TARGET > 0:
+        sales_progress = float("{:.2f}".format((actual_sales / SALES_TARGET) * 100))
+    else:
+        sales_progress = 0.0
+
     total_analyses = HealthReport.objects.count()
     total_users = User.objects.count()
     total_orders = Order.objects.count()
 
-    return render(request, 'core/admin_analytics.html', {
-        'disease_stats': disease_stats,
+    # --- 2. SALES TRENDS (Monthly) ---
+    today = timezone.now()
+    twelve_months_ago = today - datetime.timedelta(days=365)
+    
+    monthly_sales = Order.objects.filter(ordered_at__gte=twelve_months_ago)\
+        .annotate(month=TruncMonth('ordered_at'))\
+        .values('month')\
+        .annotate(total=Sum('total_price'), count=Count('id'))\
+        .order_by('month')
+
+    sales_labels = [m['month'].strftime('%b %Y') for m in monthly_sales]
+    sales_data = [float(m['total'] or 0) for m in monthly_sales]
+    order_counts = [int(m['count'] or 0) for m in monthly_sales]
+
+    # --- 3. TOP SELLING PRODUCTS ---
+    top_products_query = AyurvedicPlant.objects.annotate(
+        sales_count=Count('order')
+    ).filter(sales_count__gt=0).order_by('-sales_count')[:10]
+    
+    product_names = [p.name for p in top_products_query]
+    product_sales = [p.sales_count for p in top_products_query]
+
+    # --- 4. BRAND/CATEGORY ANALYSIS (Using predicted diseases as categories) ---
+    disease_shares = HealthReport.objects.values('predicted_disease')\
+        .annotate(count=Count('id'))\
+        .order_by('-count')[:5]
+    
+    disease_labels = [d['predicted_disease'] for d in disease_shares]
+    disease_values = [d['count'] for d in disease_shares]
+
+    # --- 5. DETAILED DATA TABLE ---
+    recent_orders = Order.objects.select_related('user').order_by('-ordered_at')[:15]
+
+    context = {
+        'actual_sales': actual_sales,
+        'sales_target': SALES_TARGET,
+        'sales_progress': sales_progress,
         'total_analyses': total_analyses,
         'total_users': total_users,
         'total_orders': total_orders,
-    })
+        'sales_labels': sales_labels,
+        'sales_data': sales_data,
+        'order_counts': order_counts,
+        'product_names': product_names,
+        'product_sales': product_sales,
+        'disease_labels': disease_labels,
+        'disease_values': disease_values,
+        'recent_orders': recent_orders,
+        'current_month_name': today.strftime('%B'),
+        'top_disease': disease_shares[0] if disease_shares else None
+    }
+
+    return render(request, 'core/admin_analytics.html', context)
 
 @staff_member_required
 @csrf_exempt
@@ -422,7 +483,7 @@ def admin_orders(request):
             messages.success(request, f"Order #{order_id} status updated to {new_status}")
             return redirect('admin_orders')
             
-    orders = Order.objects.all().order_by('-ordered_at')
+    orders = Order.objects.select_related('user').all().order_by('-ordered_at')
     # Annotate customer name to avoid long template tags that get formatted poorly
     for order in orders:
         order.customer_name = order.user.get_full_name() or order.user.username
@@ -485,18 +546,21 @@ def identify_plant(request):
                     # Get location from request if available
                     lat = request.POST.get('latitude')
                     lon = request.POST.get('longitude')
-                    
+                    # Initialize payload and conditionally add location using unpacking to broaden inferred type
                     payload = {
                         "images": [f"data:image/jpeg;base64,{image_data}"],
-                        "similar_images": True
+                        "similar_images": True,
                     }
                     
-                    if lat and lon and lat.strip() and lon.strip():
+                    if lat and lon and str(lat).strip() and str(lon).strip():
                         try:
-                            payload["latitude"] = float(lat)
-                            payload["longitude"] = float(lon)
-                        except ValueError:
-                            pass # Ignore malformed lat/lon
+                            payload = {
+                                **payload,
+                                "latitude": float(lat),
+                                "longitude": float(lon)
+                            }
+                        except (ValueError, TypeError):
+                            pass 
                     
                     # Increase timeout to 25s for larger images/slow connections
                     response = requests.post(url, json=payload, headers=headers, timeout=25)
@@ -510,11 +574,11 @@ def identify_plant(request):
                         for s in suggestions[:5]:
                             all_suggestions.append({
                                 'name': s['name'],
-                                'probability': round(s['probability'] * 100, 1)
+                                'probability': float("{:.1f}".format(s['probability'] * 100))
                             })
                             
                         top_match = suggestions[0]
-                        confidence = round(top_match['probability'] * 100, 1)
+                        confidence = float("{:.1f}".format(top_match['probability'] * 100))
                         ai_identified_name = top_match['name']
                         
                         db_plant = None
@@ -548,7 +612,7 @@ def identify_plant(request):
                                         break
                                         
                             if db_plant:
-                                confidence = round(suggestion['probability'] * 100, 1)
+                                confidence = float("{:.1f}".format(suggestion['probability'] * 100))
                                 break
                         
                         if db_plant:
@@ -586,7 +650,12 @@ def identify_plant(request):
                     traceback.print_exc()
                     print(f"AI Identification Error: {str(e)}")
                     api_error = True
-                    messages.error(request, f"Connection Error: {str(e)[:50]}... Using local matching.")
+                    error_str = str(e)
+                    if len(error_str) > 50:
+                        error_snippet = error_str[:50]
+                    else:
+                        error_snippet = error_str
+                    messages.error(request, f"Connection Error: {error_snippet}... Using local matching.")
 
             # 2. FALLBACK: Local Image/Filename Matching (Original Logic)
             filename = img.name.lower()
@@ -599,13 +668,12 @@ def identify_plant(request):
             name_part = filename.split('.')[0]
             normalized_filename = name_part.replace(" ", "").replace("_", "").replace("-", "")
             
-            import random
             matched_plant = None
             for plant in all_plants:
                 normalized_plant_name = plant.name.lower().replace(" ", "")
                 if normalized_plant_name in normalized_filename or normalized_filename in normalized_plant_name:
                     matched_plant = plant
-                    confidence = round(random.uniform(97.2, 99.9), 1)
+                    confidence = float("{:.1f}".format(random.uniform(97.2, 99.9)))
                     break
             
             if matched_plant:
@@ -614,7 +682,7 @@ def identify_plant(request):
                 plant_list = list(all_plants)
                 idx = sum(ord(c) for c in filename) % len(plant_list)
                 result = plant_list[idx]
-                confidence = round(random.uniform(82.5, 94.8), 1)
+                confidence = float("{:.1f}".format(random.uniform(82.5, 94.8)))
     
     return render(request, 'core/identify.html', {'result': result, 'confidence': confidence})
 
@@ -831,6 +899,12 @@ def import_botanicals_csv(request):
             
             plants_created = 0
             for row in reader:
+                try:
+                    price_val = row.get('price', 0)
+                    price = float(price_val) if price_val and str(price_val).strip() else 0.0
+                except (ValueError, TypeError):
+                    price = 0.0
+                    
                 AyurvedicPlant.objects.create(
                     name=row.get('name'),
                     scientific_name=row.get('scientific_name'),
@@ -839,7 +913,7 @@ def import_botanicals_csv(request):
                     habitat=row.get('habitat'),
                     preparation_method=row.get('preparation_method'),
                     precautions=row.get('precautions'),
-                    price=float(row.get('price', 0))
+                    price=price
                 )
                 plants_created += 1
                 
@@ -848,3 +922,36 @@ def import_botanicals_csv(request):
             messages.error(request, f'❌ Error during import: {str(e)}')
             
     return redirect('admin_plants')
+
+@staff_member_required
+def import_conditions_csv(request):
+    """Bulk import conditions/disease logic from a CSV file."""
+    if request.method == 'POST' and request.FILES.get('csv_file'):
+        csv_file = request.FILES['csv_file']
+        
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, '❌ Please upload a valid CSV file.')
+            return redirect('admin_conditions')
+            
+        try:
+            decoded_file = csv_file.read().decode('utf-8')
+            io_string = io.StringIO(decoded_file)
+            reader = csv.DictReader(io_string)
+            
+            conditions_created = 0
+            for row in reader:
+                AyurvedicCondition.objects.create(
+                    name=row.get('name'),
+                    keywords=row.get('keywords'),
+                    remedy=row.get('remedy'),
+                    preparation=row.get('preparation'),
+                    search_terms=row.get('search_terms')
+                )
+                conditions_created += 1
+                
+            messages.success(request, f'✅ Successfully imported {conditions_created} disease logic entries.')
+        except Exception as e:
+            messages.error(request, f'❌ Error during import: {str(e)}')
+            
+    return redirect('admin_conditions')
+

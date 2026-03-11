@@ -1,0 +1,17 @@
+{
+    "include": [
+        "vedacare_backend"
+    ],
+    "executionEnvironments": [
+        {
+            "root": "vedacare_backend"
+        }
+    ],
+    "extraPaths": [
+        "./vedacare_backend"
+    ],
+    "autoSearchPaths": true,
+    "venvPath": ".",
+    "venv": "venv"
+}
+

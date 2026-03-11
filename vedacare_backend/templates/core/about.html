@@ -1,0 +1,216 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}About Us - VedaCare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-hero {
+        background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+        color: white;
+        padding: 5rem 5% 8rem;
+        text-align: center;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -4rem;
+        position: relative;
+    }
+
+    .about-hero h1 {
+        font-family: var(--font-display);
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .about-hero p {
+        font-size: 1.25rem;
+        max-width: 800px;
+        margin: 0 auto;
+        opacity: 0.9;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .mission-section {
+        background: white;
+        border-radius: 30px;
+        padding: 4rem;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+        position: relative;
+        z-index: 10;
+        margin-top: -3rem;
+    }
+
+    .mission-text h2 {
+        font-family: var(--font-display);
+        font-size: 2.5rem;
+        color: var(--primary-dark);
+        margin-bottom: 1.5rem;
+    }
+
+    .mission-text p {
+        line-height: 1.8;
+        color: #4b5563;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .mission-image {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+
+    .mission-image img {
+        width: 100%;
+        display: block;
+    }
+
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 5rem;
+    }
+
+    .value-card {
+        background: #fdfdfd;
+        padding: 3rem 2rem;
+        border-radius: 24px;
+        text-align: center;
+        border: 1px solid #f1f5f1;
+        transition: transform 0.3s ease;
+    }
+
+    .value-card:hover {
+        transform: translateY(-10px);
+        background: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+
+    .value-icon {
+        font-size: 3rem;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .value-card h3 {
+        font-size: 1.5rem;
+        color: var(--primary-dark);
+        margin-bottom: 1rem;
+    }
+
+    .value-card p {
+        color: #6b7280;
+        line-height: 1.6;
+    }
+
+    .stats-bar {
+        background: var(--primary-dark);
+        color: white;
+        padding: 4rem 2rem;
+        border-radius: 30px;
+        margin-top: 6rem;
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
+
+    .stat-item h4 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-item p {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        opacity: 0.8;
+    }
+
+    @media (max-width: 900px) {
+        .mission-section {
+            grid-template-columns: 1fr;
+            padding: 2.5rem;
+            gap: 2rem;
+        }
+
+        .about-hero h1 {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="about-hero">
+    <h1>Our Ayurvedic Journey</h1>
+    <p>We are dedicated to bridge the gap between ancient botanical wisdom and modern AI technology, bringing nature back to your daily wellness routine.</p>
+</section>
+
+<div class="container">
+    <section class="mission-section">
+        <div class="mission-text">
+            <h2>Merging Heritage with Technology</h2>
+            <p>VedaCare was born from a simple observation: the world's most powerful healing secrets are often hidden in plain sight, scattered across gardens and forests. However, the knowledge of how to identify and use these plants is fading.</p>
+            <p>Our mission is to preserve this heritage using cutting-edge Artificial Intelligence. By providing instant identification and symptom-based recommendations, we empower individuals to take charge of their health naturally and sustainably.</p>
+        </div>
+        <div class="mission-image">
+            <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=800&q=80" alt="Ayurvedic Herbs">
+        </div>
+    </section>
+
+    <div class="values-grid">
+        <div class="value-card">
+            <i class="fas fa-microchip value-icon"></i>
+            <h3>AI Identification</h3>
+            <p>Utilizing advanced computer vision to identify medicinal plants with over 95% accuracy in seconds.</p>
+        </div>
+        <div class="value-card">
+            <i class="fas fa-vial value-icon"></i>
+            <h3>Verified Science</h3>
+            <p>Every remedy in our database is referenced from traditional Ayurvedic texts and verified by herbal specialists.</p>
+        </div>
+        <div class="value-card">
+            <i class="fas fa-seedling value-icon"></i>
+            <h3>Direct Sourcing</h3>
+            <p>Connecting you directly with sustainable farmers to ensure you get the purest organic herbs for your remedies.</p>
+        </div>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            <h4>500+</h4>
+            <p>Medicinal Plants</p>
+        </div>
+        <div class="stat-item">
+            <h4>50k+</h4>
+            <p>Happy Users</p>
+        </div>
+        <div class="stat-item">
+            <h4>120+</h4>
+            <p>Remedy Codes</p>
+        </div>
+        <div class="stat-item">
+            <h4>98%</h4>
+            <p>Accuracy</p>
+        </div>
+    </div>
+</div>
+
+<section style="text-align:center; padding: 6rem 1rem;">
+    <h2 style="font-family:var(--font-display); font-size:2.5rem; color:var(--primary-dark); margin-bottom:1.5rem;">Join the Natural Revolution</h2>
+    <p style="color:#64748b; max-width:600px; margin: 0 auto 2.5rem;">Start your journey to holistic wellness today. Let VedaCare be your companion in discovering nature's pharmacy.</p>
+    <a href="{% url 'register' %}" class="btn-analyze" style="display:inline-flex; width:auto; padding: 1rem 3rem; text-decoration:none;">Create Your Free Account</a>
+</section>
+{% endblock %}
