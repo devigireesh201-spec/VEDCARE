@@ -16,24 +16,71 @@
         </div>
 
         {% if notifications %}
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-            {% for notification in notifications %}
-            <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-md); border-left: 5px solid {% if not notification.is_read %}var(--primary-500){% else %}var(--gray-300){% endif %}; transition: transform 0.3s;"
-                onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
-                <div
-                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                    <h3 style="margin: 0; color: var(--gray-900); font-size: 1.25rem;">{{ notification.title }}</h3>
-                    <span style="font-size: 0.85rem; color: var(--gray-500);">{{ notification.created_at|timesince }}
-                        ago</span>
-                </div>
-                <p style="margin: 0; color: var(--gray-600); line-height: 1.6;">{{ notification.message }}</p>
-                {% if not notification.is_read %}
-                <span
-                    style="display: inline-block; width: 8px; height: 8px; background: var(--primary-500); border-radius: 50%; margin-top: 0.5rem;"></span>
-                {% endif %}
+        <form method="POST" action="{% url 'notifications' %}" id="notifications-form">
+            {% csrf_token %}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; background: white; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: var(--shadow-sm);">
+                <label style="display: flex; align-items: center; gap: 0.8rem; cursor: pointer; font-weight: 600; color: var(--gray-700);">
+                    <input type="checkbox" id="select-all" style="width: 18px; height: 18px; cursor: pointer;">
+                    Select All
+                </label>
+                <button type="submit" id="delete-btn" class="btn btn-primary" style="background: #ef4444; border: none; padding: 0.6rem 1.2rem; display: none; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                    <i class="fas fa-trash-alt"></i> Delete Selected
+                </button>
             </div>
-            {% endfor %}
-        </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for notification in notifications %}
+                <label class="notification-row" style="cursor: pointer; display: block; background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-md); border-left: 5px solid {% if not notification.is_read %}var(--primary-500){% else %}var(--gray-300){% endif %}; transition: transform 0.3s;"
+                    onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
+                    
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <input type="checkbox" name="notification_ids" value="{{ notification.id }}" class="notification-checkbox" style="width: 20px; height: 20px; margin-top: 0.25rem; cursor: pointer;">
+                        
+                        <div style="flex-grow: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                <h3 style="margin: 0; color: var(--gray-900); font-size: 1.25rem;">{{ notification.title }}</h3>
+                                <span style="font-size: 0.85rem; color: var(--gray-500);">{{ notification.created_at|timesince }}
+                                    ago</span>
+                            </div>
+                            <p style="margin: 0; color: var(--gray-600); line-height: 1.6;">{{ notification.message }}</p>
+                            {% if not notification.is_read %}
+                            <span
+                                style="display: inline-block; width: 8px; height: 8px; background: var(--primary-500); border-radius: 50%; margin-top: 0.5rem;"></span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+        </form>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const selectAll = document.getElementById('select-all');
+                const checkboxes = document.querySelectorAll('.notification-checkbox');
+                const deleteBtn = document.getElementById('delete-btn');
+
+                function toggleDeleteButton() {
+                    const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+                    deleteBtn.style.display = anyChecked ? 'flex' : 'none';
+                    
+                    // Update select all state based on individual checkboxes
+                    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                    selectAll.checked = allChecked && checkboxes.length > 0;
+                }
+
+                selectAll.addEventListener('change', function() {
+                    checkboxes.forEach(cb => {
+                        cb.checked = selectAll.checked;
+                    });
+                    toggleDeleteButton();
+                });
+
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', toggleDeleteButton);
+                });
+            });
+        </script>
         {% else %}
         <div
             style="text-align: center; padding: 5rem 2rem; background: white; border-radius: 1rem; box-shadow: var(--shadow-sm);">

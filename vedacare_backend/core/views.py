@@ -7,7 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 import datetime
 # Import your custom models and AI engine
-from .models import UserProfile, AyurvedicPlant, HealthReport, Order, Notification, AyurvedicCondition
+from .models import UserProfile, AyurvedicPlant, HealthReport, Order, Notification, AyurvedicCondition, HerbalMethod, MethodSearchLog
 from .ai_engine import predict_ayurveda
 import json
 from django.http import JsonResponse
@@ -146,32 +146,57 @@ def symptom_checker(request):
             prediction, remedy, preparation, search_terms = predict_ayurveda(user_input)
             
             # IMPROVED MATCHING LOGIC
-            # Start with an empty query
-            query = Q()
+            recommended_plants_list = []
             
-            # Fetch the matching plants
             important_terms = [t.strip() for t in search_terms if t.strip()]
-            if important_terms:
-                for term in important_terms:
-                    query |= Q(name__icontains=term) | Q(medicinal_use__icontains=term) | Q(properties__icontains=term)
             
-            # 2. Check if user mentioned any plant names or keywords specifically
-            user_words = user_input.lower().split()
-            important_keywords = ["skin", "fever", "pain", "digest", "energy", "stress", "sleep", "cold", "cough"]
-            for word in user_words:
-                if len(word) > 3: # Ignore small words
-                    if word in important_keywords:
-                       query |= Q(medicinal_use__icontains=word) | Q(properties__icontains=word)
+            # 1. Try to find the exactly recommended plants in the database first
+            for term in important_terms:
+                term_matches = AyurvedicPlant.objects.filter(
+                    Q(name__icontains=term) | Q(scientific_name__icontains=term)
+                )
+                if term_matches.exists():
+                    # Avoid duplicates
+                    for match in term_matches:
+                        if match not in recommended_plants_list:
+                            recommended_plants_list.append(match)
+                            
+            # 2. If the exact recommended plants are NOT in the database, 
+            #    we create virtual plants so we can show them using the API image!
+            if not recommended_plants_list and important_terms:
+                class VirtualPlant:
+                    def __init__(self, name):
+                        self.name = name
+                        self.scientific_name = name
+                        self.image = None
+                        self.api_image_url = None
+                
+                recommended_plants_list = [VirtualPlant(t) for t in important_terms[:3]]
+                
+            # 3. Complete Fallback: No search terms, no DB matches
+            if not recommended_plants_list:
+                 recommended_plants_list = list(AyurvedicPlant.objects.all()[:3])
 
-            # Fetch the matching plants
-            if query != Q():
-                recommended_plants = AyurvedicPlant.objects.filter(query).distinct()[:5]
-            else:
-                recommended_plants = AyurvedicPlant.objects.none()
+            def get_plant_image_url(plant_name):
+                API_KEY = "CmYPdul8o5BwCb2M16zcTruNVHbsGPYwHmTDb7nvQGwhlRJIQh"
+                headers = {"Api-Key": API_KEY}
+                url1 = f"https://plant.id/api/v3/kb/plants/name_search?q={plant_name}"
+                try:
+                    res1 = requests.get(url1, headers=headers, timeout=5).json()
+                    if res1.get('entities') and len(res1['entities']) > 0:
+                        access_token = res1['entities'][0]['access_token']
+                        url2 = f"https://plant.id/api/v3/kb/plants/{access_token}?details=image"
+                        res2 = requests.get(url2, headers=headers, timeout=5).json()
+                        if res2.get('image') and res2['image'].get('value'):
+                            return res2['image']['value']
+                except Exception as e:
+                    print(f"Error fetching plant image for {plant_name}: {e}")
+                return None
 
-            # 3. Fallback: If no plants found, just show first few
-            if not recommended_plants.exists():
-                recommended_plants = AyurvedicPlant.objects.all()[:3]
+            # Add api_image_url to plants if they don't have local images
+            for plant in recommended_plants_list:
+                if not getattr(plant, 'image', None):
+                    plant.api_image_url = get_plant_image_url(plant.name)
 
             # MODULE 8: Store Analysis in User History
             report = HealthReport.objects.create(
@@ -182,8 +207,13 @@ def symptom_checker(request):
                 preparation_method=preparation,
                 probability=85.0  # Placeholder for severity logic
             )
-            if recommended_plants:
-                report.recommended_plants.set(recommended_plants)
+            
+            # Save only real database models to many-to-many field
+            db_plants = [p for p in recommended_plants_list if isinstance(p, AyurvedicPlant)]
+            if db_plants:
+                report.recommended_plants.set(db_plants)
+                
+            recommended_plants = recommended_plants_list
             
             # MODULE 9: Create notification for new analysis
             Notification.objects.create(
@@ -494,6 +524,8 @@ def admin_orders(request):
 @csrf_exempt
 def admin_notifications(request):
     """Admin Module: Create and Broadcast Notifications."""
+    preselected_user_id = request.GET.get('preselect')
+    
     if request.method == 'POST':
         title = request.POST.get('title')
         message = request.POST.get('message')
@@ -514,7 +546,10 @@ def admin_notifications(request):
             return redirect('admin_notifications')
 
     users = User.objects.all().order_by('username')
-    return render(request, 'core/admin_notifications.html', {'users': users})
+    return render(request, 'core/admin_notifications.html', {
+        'users': users,
+        'preselected_user_id': preselected_user_id
+    })
 @login_required
 @csrf_exempt
 def identify_plant(request):
@@ -758,6 +793,14 @@ def delete_account(request):
 @login_required
 def notifications_view(request):
     """Module 9: Notifications display and management."""
+    if request.method == 'POST':
+        notification_ids = request.POST.getlist('notification_ids')
+        if notification_ids:
+            # Delete selected notifications belonging to the user
+            Notification.objects.filter(id__in=notification_ids, user=request.user).delete()
+            messages.success(request, f"Successfully deleted {len(notification_ids)} notification(s).")
+        return redirect('notifications')
+
     # Force evaluation of the list so they show as unread on this page load
     notifications = list(Notification.objects.filter(user=request.user).order_by('-created_at'))
     
@@ -955,3 +998,44 @@ def import_conditions_csv(request):
             
     return redirect('admin_conditions')
 
+
+@login_required
+def herbal_methods_search(request):
+    """Search for herbal preparation methods and recipes (Hibiscus Thali, etc)."""
+    query = request.GET.get('q', '').strip()
+    methods = HerbalMethod.objects.none()
+    
+    if query:
+        # Log the search
+        MethodSearchLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            query=query
+        )
+        # Search by name or description
+        methods = HerbalMethod.objects.filter(
+            Q(name__icontains=query) | Q(description__icontains=query) | Q(ingredients__icontains=query)
+        )
+    
+    # If no results and query is empty, show some featured ones or generic list
+    featured_methods = HerbalMethod.objects.all()[:6] if not query else methods
+
+    return render(request, 'core/herbal_methods.html', {
+        'methods': methods,
+        'query': query,
+        'featured_methods': featured_methods
+    })
+
+@staff_member_required
+def admin_method_search_logs(request):
+    """Admin view to see what users are searching for in the herbal methods section."""
+    logs = MethodSearchLog.objects.all().order_by('-timestamp')
+    
+    # Simple analytics
+    top_searches = MethodSearchLog.objects.values('query').annotate(
+        count=Count('id')
+    ).order_by('-count')[:10]
+
+    return render(request, 'core/admin_method_logs.html', {
+        'logs': logs,
+        'top_searches': top_searches
+    })

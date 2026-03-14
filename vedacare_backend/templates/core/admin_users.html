@@ -188,6 +188,9 @@
             <a href="{% url 'admin_orders' %}" class="admin-nav-item">
                 <i class="fas fa-shopping-cart"></i> Order Tracking
             </a>
+            <a href="{% url 'admin_notifications' %}" class="admin-nav-item">
+                <i class="fas fa-bell"></i> Send Notifications
+            </a>
             <a href="{% url 'profile' %}" class="admin-nav-item">
                 <i class="fas fa-user-circle"></i> My Profile
             </a>
@@ -204,12 +207,6 @@
                 <h1>User Management</h1>
                 <p>Manage patient accounts and administrative staff.</p>
             </div>
-            <button
-                onclick="alert('Staff invitation system logic is now managed via the Toggle Staff action for existing users.')"
-                class="btn-primary-admin"
-                style="padding: 0.875rem 1.5rem; border-radius: var(--radius-lg); border: none; font-weight: 700; cursor: pointer; color: white; background: var(--admin-primary); display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-user-plus"></i> Admin Management
-            </button>
         </div>
 
         <div class="content-card">
@@ -258,6 +255,9 @@
                                             class="fas {% if user.is_staff %}fa-user-minus{% else %}fa-user-shield{% endif %}"></i>
                                     </button>
                                 </form>
+                                <a href="{% url 'admin_notifications' %}?preselect={{ user.id }}" class="action-btn-sm" title="Send Notification">
+                                    <i class="fas fa-paper-plane"></i>
+                                </a>
                                 {% if user != request.user %}
                                 <form method="POST" onsubmit="return confirm('Delete this user account permanently?')">
                                     {% csrf_token %}

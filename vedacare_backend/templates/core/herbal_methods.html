@@ -1,0 +1,83 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Herbal Methods & Recipes - VedaCare{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 4rem 1rem;">
+    <div style="max-width: 1000px; margin: 0 auto;">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 4rem;">
+            <h1 style="color: var(--primary-900); font-family: var(--font-display); font-size: 3rem; margin-bottom: 1rem;">
+                <i class="fas fa-mortar-pestle"></i> Herbal Preparation Methods
+            </h1>
+            <p style="color: var(--gray-600); font-size: 1.2rem; max-width: 700px; margin: 0 auto;">
+                Search for traditional Ayurvedic recipes, thalis, and preparation guides. 
+                Discover how to prepare potent herbal remedies at home.
+            </p>
+        </div>
+
+        <!-- Search Bar -->
+        <div style="margin-bottom: 4rem; position: relative; max-width: 800px; margin-left: auto; margin-right: auto;">
+            <form method="GET" action="{% url 'herbal_methods' %}">
+                <i class="fas fa-search" style="position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); color: var(--gray-400); font-size: 1.2rem;"></i>
+                <input type="text" name="q" value="{{ query }}" 
+                    style="width: 100%; padding: 1.3rem 1.5rem 1.3rem 3.5rem; border-radius: 20px; border: 1px solid var(--gray-200); box-shadow: var(--shadow-lg); font-size: 1.1rem; outline: none; transition: 0.3s;"
+                    placeholder="Search recipes (e.g. Hibiscus Thali, Ginger Tea...)" onfocus="this.style.borderColor='var(--primary-500)';">
+                <button type="submit" class="btn btn-primary" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); border-radius: 15px; padding: 0.8rem 1.5rem;">
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Results / Featured Section -->
+        {% if methods %}
+            <h2 style="color: var(--gray-800); margin-bottom: 2rem;">Search Results for "{{ query }}"</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 2rem;">
+                {% for method in methods %}
+                <div style="background: white; border-radius: 24px; padding: 2rem; box-shadow: var(--shadow-md); border-top: 6px solid var(--primary-500);">
+                    <h3 style="color: var(--primary-800); font-size: 1.5rem; margin-bottom: 1rem;">{{ method.name }}</h3>
+                    <p style="color: var(--gray-600); margin-bottom: 1.5rem; font-style: italic;">{{ method.description }}</p>
+                    
+                    <div style="background: var(--primary-50); padding: 1.5rem; border-radius: 15px; margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--primary-700); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem;">
+                            <i class="fas fa-leaf"></i> Ingredients
+                        </h4>
+                        <p style="color: var(--primary-900); white-space: pre-line;">{{ method.ingredients }}</p>
+                    </div>
+
+                    <div>
+                        <h4 style="color: var(--gray-700); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem;">
+                            <i class="fas fa-list-ol"></i> Step-by-Step Recipe
+                        </h4>
+                        <p style="color: var(--gray-800); line-height: 1.7; white-space: pre-line;">{{ method.recipe }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% elif query %}
+            <div style="text-align: center; padding: 5rem; background: white; border-radius: 24px; box-shadow: var(--shadow-sm);">
+                <i class="fas fa-search-minus" style="font-size: 4rem; color: var(--gray-200); margin-bottom: 1.5rem;"></i>
+                <h3 style="color: var(--gray-800);">No recipes found for "{{ query }}"</h3>
+                <p style="color: var(--gray-500);">Try searching for specific herbs or methods like 'Thali' or 'Decoction'.</p>
+            </div>
+        {% else %}
+            <!-- Featured / Discover -->
+            <h2 style="color: var(--gray-800); margin-bottom: 2rem;">Discover Herbal Methods</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 2rem;">
+                {% for method in featured_methods %}
+                <div style="background: white; border-radius: 24px; padding: 2rem; box-shadow: var(--shadow-sm); transition: 0.3s;" 
+                    onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='var(--shadow-lg)';" 
+                    onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-sm)';">
+                    <h3 style="color: var(--gray-900); font-size: 1.5rem; margin-bottom: 1rem;">{{ method.name }}</h3>
+                    <p style="color: var(--gray-500); margin-bottom: 1.5rem;">{{ method.description|truncatewords:20 }}</p>
+                    <a href="?q={{ method.name|urlencode }}" class="btn btn-outline-primary" style="border-radius: 12px;">View Recipe</a>
+                </div>
+                {% empty %}
+                <p style="color: var(--gray-500);">Start searching to discover traditional recipes!</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

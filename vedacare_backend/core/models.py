@@ -67,3 +67,23 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.title}"
+
+# NEW: Herbal Method Search & Logging
+class HerbalMethod(models.Model):
+    name = models.CharField(max_length=200) # e.g. Hibiscus Thali
+    description = models.TextField() # What it is used for
+    ingredients = models.TextField() # List of ingredients
+    recipe = models.TextField() # Step by step instructions
+    image = models.ImageField(upload_to='methods/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class MethodSearchLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    query = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Search for '{self.query}' by {self.user.username if self.user else 'Anonymous'}"

@@ -218,10 +218,12 @@
                     <label class="form-label">Recipient <span class="broadcast-badge">Broadcast via 'All
                             Users'</span></label>
                     <select name="user_id" class="form-select" required>
-                        <option value="all">📢 All Users (Global Broadcast)</option>
+                        <option value="all" {% if preselected_user_id == 'all' %}selected{% endif %}>📢 All Users (Global Broadcast)</option>
                         <optgroup label="Individual Patients">
                             {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
+                            <option value="{{ user.id }}" {% if preselected_user_id == user.id|stringformat:"s" %}selected{% endif %}>
+                                {{ user.username }} ({{ user.email }})
+                            </option>
                             {% endfor %}
                         </optgroup>
                     </select>

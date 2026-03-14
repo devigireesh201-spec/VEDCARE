@@ -311,14 +311,14 @@
             <li><a href="{% url 'admin_users' %}"><i class="fas fa-users-cog"></i> Users</a></li>
             <li><a href="{% url 'admin_plants' %}"><i class="fas fa-database"></i> Plants</a></li>
             <li><a href="{% url 'admin_orders' %}"><i class="fas fa-clipboard-list"></i> Orders</a></li>
+            <li><a href="{% url 'admin_method_logs' %}"><i class="fas fa-search"></i> Search Logs</a></li>
             {% else %}
             <li><a href="{% url 'home' %}">Home</a></li>
             <li><a href="{% url 'dashboard' %}"><i class="fas fa-th-large"></i> Dashboard</a></li>
             <li><a href="{% url 'identify_plant' %}"><i class="fas fa-camera"></i> Scan Plant</a></li>
             <li><a href="{% url 'symptoms' %}"><i class="fas fa-notes-medical"></i> Symptoms</a></li>
+            <li><a href="{% url 'herbal_methods' %}"><i class="fas fa-mortar-pestle"></i> Herbal Methods</a></li>
             <li><a href="{% url 'ekart' %}"><i class="fas fa-shopping-cart"></i> E-Kart</a></li>
-            {% endif %}
-
             <li>
                 <a href="{% url 'notifications' %}" style="position: relative;">
                     <i class="fas fa-bell"></i> Alerts
@@ -327,6 +327,7 @@
                     {% endif %}
                 </a>
             </li>
+            {% endif %}
             <li><a href="{% url 'profile' %}"><i class="fas fa-user-circle"></i> Profile</a></li>
             <li>
                 <a href="{% url 'logout' %}"

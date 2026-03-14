@@ -375,6 +375,32 @@
                     </div>
                 </div>
 
+                {% if recommended_plants %}
+                <div style="margin-top:2.5rem;">
+                    <h4 style="font-weight:800; text-transform:uppercase; font-size:0.85rem; letter-spacing:2px; color:#64748b; margin-bottom:1.2rem;">
+                        Key Herbal Plants for this Remedy</h4>
+                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                        {% for plant in recommended_plants %}
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 20px; overflow: hidden; width: 220px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); transition: transform 0.2s;">
+                            {% if plant.image %}
+                                <img src="{{ plant.image.url }}" alt="{{ plant.name }}" style="width: 100%; height: 160px; object-fit: cover;">
+                            {% elif plant.api_image_url %}
+                                <img src="{{ plant.api_image_url }}" alt="{{ plant.name }}" style="width: 100%; height: 160px; object-fit: cover;">
+                            {% else %}
+                                <div style="width: 100%; height: 160px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                                    <i class="fas fa-leaf fa-3x"></i>
+                                </div>
+                            {% endif %}
+                            <div style="padding: 1.2rem;">
+                                <h5 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.3rem;">{{ plant.name }}</h5>
+                                <p style="margin: 0; font-size: 0.85rem; color: #64748b; font-style: italic;">{{ plant.scientific_name }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <div style="margin-top:3rem;">
                     <h4
                         style="font-weight:800; text-transform:uppercase; font-size:0.85rem; letter-spacing:2px; color:#64748b; margin-bottom:1.5rem;">
